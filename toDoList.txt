@@ -1,0 +1,10 @@
++Prettier
++Component names
++Spell checker
++Change state only via useState, setState (not like this.state.itemsArray......)
++Functional components
++Export const instead of default
++Change styles via useState
+1.Hamburger menu
+2.More components less repeat
+3.Not pushing components in state
