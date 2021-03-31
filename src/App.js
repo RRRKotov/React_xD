@@ -1,28 +1,48 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./App.css";
 import data from "./data.json";
 import { ContainerItem } from "./components/containerItem/ContainerItem.js";
+import { ListItem } from "./components/listItem/ListItem.js";
+import { MobileListItem } from "./components/mobileListItem/MobileListItem.js";
+import { NavigationItem } from "./components/navigationItem/NavigationItem.js";
 
 export const App = () => {
-  const [newArray, setNewArray] = useState([]);
-
-  const [itemsArray, setItemsArray] = useState([]);
+  const [newArray, setNewArray] = useState(data);
 
   const [mobileStyles, setMobileStyles] = useState({ display: "none" });
 
   const [containerStyles, setContainerStyles] = useState({ display: "block" });
 
-  // useEffect(() => {
-  //   data.forEach((item) => {
-  //     setNewArray((prev) => [...prev, <ContainerItem props={item} />]);
-  //   });
-  // });
+  let newData = data;
 
-  let newData = [];
+  let whySpringArray = [
+    "Overview",
+    "Microservices", //(Spell checker doesn't like it)Same name in the original site
+    "Reactive",
+    "Event Driven",
+    "Cloud",
+    "Web Applications",
+    "Serverless",
+    "Batch",
+  ];
+
+  let learnArray = ["Overview", "Quickstart", "Guides", "Blog"];
+
+  let projectsArray = [
+    "Overview",
+    "Spring Boot",
+    "Spring Framework",
+    "Spring Cloud",
+    "Spring Cloud Data Flow",
+    "Spring Data",
+    "Spring Integration",
+    "Spring Batch",
+    "Spring Security",
+  ];
+
+  let communityArray = ["Overview", "Events", "Team"];
 
   let InputChange = (e) => {
-    // this.state.itemsArray.length = 0;
-    setItemsArray([]);
     newData = data.filter((item) => {
       return (
         item.content.toUpperCase().includes(e.target.value.toUpperCase()) ||
@@ -32,10 +52,6 @@ export const App = () => {
 
     setNewArray(newData);
   };
-
-  newArray.forEach((item) => {
-    setItemsArray((prev) => [...prev, <ContainerItem props={item} />]);
-  });
 
   let mobileOpenClose = () => {
     if (mobileStyles.display === "block") {
@@ -47,6 +63,40 @@ export const App = () => {
     }
   };
 
+  let mobileData = [
+    {
+      titleClass: "mobile__why",
+      content: "Why Spring",
+      listClass: "mobile__ul why",
+      array: whySpringArray,
+    },
+    {
+      titleClass: "mobile__learn",
+      content: "Learn",
+      listClass: "mobile__ul learn",
+      array: learnArray,
+    },
+    {
+      titleClass: "mobile__projects",
+      content: "Projects",
+      listClass: "mobile__ul proj",
+      array: projectsArray,
+    },
+    {
+      titleClass: "mobile__community",
+      content: "Community",
+      listClass: "mobile__ul comm",
+      array: communityArray,
+    },
+  ];
+
+  let navigationData = [
+    { className: "navCont__whySpring_button", content: "Why Spring" },
+    { className: "navCont__learn_button", content: "Learn" },
+    { className: "navCont__projects_button", content: "Projects" },
+    { className: "navCont__community_button", content: "Community" },
+  ];
+
   return (
     <div>
       <div style={mobileStyles} className="mobile">
@@ -55,93 +105,10 @@ export const App = () => {
             <img src="images/close.png" alt="close" />
           </div>
           <div className="mobile__main">
-            <div className="mobile__why">
-              <div className="mobile__title">Why Spring</div>
-              <div className="mobile__arrow"></div>
-            </div>
-            <div className="mobile__ul why">
-              <ul className="">
-                <li>
-                  <a href="/#"> Overview</a>
-                </li>
-                <li>
-                  <a href="/#"> Microservices</a>
-                </li>
-                <li>
-                  <a href="/#"> Reactive</a>
-                </li>
-                <li>
-                  <a href="/#"> Event Driven</a>
-                </li>
-                <li>
-                  <a href="/#"> Cloud</a>
-                </li>
-                <li>
-                  <a href="/#"> Web Applications</a>
-                </li>
-                <li>
-                  <a href="/#"> Serverless</a>
-                </li>
-                <li>
-                  <a href="/#"> Batch</a>
-                </li>
-              </ul>
-            </div>
-            <div className="mobile__learn">
-              <div className="mobile__title">Learn</div>
-              <div className="mobile__arrow"></div>
-            </div>
-            <div className="mobile__ul learn">
-              <ul className=" ul">
-                <li>
-                  <a href="/#"> Overview</a>
-                </li>
-                <li>
-                  <a href="/#"> Quickstart</a>
-                </li>
-                <li>
-                  <a href="/#">Guides</a>
-                </li>
-                <li>
-                  <a href="/#">Blog</a>
-                </li>
-              </ul>
-            </div>
-            <div className="mobile__projects">
-              <div className="mobile__title">Projects</div>
-              <div className="mobile__arrow"></div>
-            </div>
-            <div className="mobile__ul proj">
-              <ul className=" ul">
-                <li>
-                  <a href="/#">Overview</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Boot</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Framework</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Cloud</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Cloud Data Flow</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Data</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Integration</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Batch</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Security</a>
-                </li>
-              </ul>
-            </div>
+            {mobileData.slice(0, 3).map((item, index) => (
+              <MobileListItem props={item} key={index} />
+            ))}
+
             <div>
               <a className="mobile__link" href="/#">
                 Training
@@ -152,31 +119,18 @@ export const App = () => {
                 Support
               </a>
             </div>
-            <div className="mobile__community">
-              <div className="mobile__title">Community</div>
-              <div className="mobile__arrow"></div>
-            </div>
-            <div className="mobile__ul comm">
-              <ul className="comm ul">
-                <li>
-                  <a href="/#">Overview</a>
-                </li>
-                <li>
-                  <a href="/#">Events</a>
-                </li>
-                <li>
-                  <a href="/#">Team</a>
-                </li>
-              </ul>
-            </div>
+
+            {mobileData.slice(3, 4).map((item, index) => (
+              <MobileListItem props={item} key={index} />
+            ))}
           </div>
         </nav>
       </div>
 
       <header className="header">
         <nav className="nav">
-          <div className="navcont">
-            <div className="navcont__logo">
+          <div className="navCont">
+            <div className="navCont__logo">
               <a href="/#">
                 <img
                   src="./images/spring-logo-9146a4d3298760c2e7e49595184e1975.svg"
@@ -184,127 +138,39 @@ export const App = () => {
                 />
               </a>
             </div>
-            <div className="navcont__list">
-              <div className="navcont__whyspring_button">
-                Why Spring
-                <img
-                  src="/images/arrow-down-sign-to-navigate.svg"
-                  alt="arrow"
-                />
-              </div>
-              <div className="navcont__learn_button">
-                Learn
-                <img
-                  src="/images/arrow-down-sign-to-navigate.svg"
-                  alt="arrow"
-                />
-              </div>
-              <div className="navcont__projects_button">
-                Projects
-                <img
-                  src="/images/arrow-down-sign-to-navigate.svg"
-                  alt="arrow"
-                />
-              </div>
+            <div className="navCont__list">
+              {navigationData.slice(0, 3).map((item, index) => (
+                <NavigationItem props={item} key={index} />
+              ))}
+
               <div>
                 <a href="/#"> Training</a>
               </div>
               <div>
                 <a href="/#"> Support</a>
               </div>
-              <div className="navcont__community_button">
-                Community
-                <img
-                  src="/images/arrow-down-sign-to-navigate.svg"
-                  alt="arrow"
-                />
-              </div>
 
-              <ul className="navcont__whyspring">
-                <li>
-                  <a href="/#"> Overview</a>
-                </li>
-                <li>
-                  <a href="/#"> Microservices</a>
-                </li>
-                <li>
-                  <a href="/#"> Reactive</a>
-                </li>
-                <li>
-                  <a href="/#"> Event Driven</a>
-                </li>
-                <li>
-                  <a href="/#"> Cloud</a>
-                </li>
-                <li>
-                  <a href="/#"> Web Applications</a>
-                </li>
-                <li>
-                  <a href="/#"> Serverless</a>
-                </li>
-                <li>
-                  <a href="/#"> Batch</a>
-                </li>
+              {navigationData.slice(3, 4).map((item, index) => (
+                <NavigationItem props={item} key={index} />
+              ))}
+
+              <ul className="navCont__whySpring">
+                {<ListItem props={whySpringArray} />}
               </ul>
 
-              <ul className="navcont__learn">
-                <li>
-                  <a href="/#"> Overview</a>
-                </li>
-                <li>
-                  <a href="/#"> Quickstart</a>
-                </li>
-                <li>
-                  <a href="/#">Guides</a>
-                </li>
-                <li>
-                  <a href="/#">Blog</a>
-                </li>
+              <ul className="navCont__learn">
+                {<ListItem props={learnArray} />}
               </ul>
 
-              <ul className="navcont__project">
-                <li>
-                  <a href="/#">Overview</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Boot</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Framework</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Cloud</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Cloud Data Flow</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Data</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Integration</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Batch</a>
-                </li>
-                <li>
-                  <a href="/#">Spring Security</a>
-                </li>
+              <ul className="navCont__project">
+                {<ListItem props={projectsArray} />}
               </ul>
 
-              <ul className="navcont__community">
-                <li>
-                  <a href="/#">Overview</a>
-                </li>
-                <li>
-                  <a href="/#">Events</a>
-                </li>
-                <li>
-                  <a href="/#">Team</a>
-                </li>
+              <ul className="navCont__community">
+                {<ListItem props={communityArray} />}
               </ul>
             </div>
-            <div onClick={mobileOpenClose} className="navcont__hamburger">
+            <div onClick={mobileOpenClose} className="navCont__hamburger">
               <div></div>
               <div></div>
               <div></div>
@@ -316,7 +182,7 @@ export const App = () => {
 
       <div className="projects">
         <div className="projects__cont">
-          <div className="projects__textname">Projects</div>
+          <div className="projects__textName">Projects</div>
           <div className="projects__text">
             From configuration to security, web apps to big data—whatever the
             infrastructure needs of your application may be, there is a Spring
@@ -330,10 +196,10 @@ export const App = () => {
       </div>
       <div style={containerStyles} className="container">
         <div className="container__main">
-          {itemsArray.map((item, index) => {
+          {newArray.map((item, index) => {
             return (
               <div className="container__item" key={index}>
-                {item}
+                {<ContainerItem props={item} />}
               </div>
             );
           })}
