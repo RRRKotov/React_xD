@@ -1,0 +1,39 @@
+.login__container {
+  width: 400px;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  border-radius: 20px;
+  background-color: aquamarine;
+}
+
+.login__container > div {
+  margin-bottom: 20px;
+}
+
+.login__main {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login__input > input {
+  height: 25px;
+  width: 250px;
+  border-radius: 5px;
+}
+
+.login__button > button {
+  width: 150px;
+  height: 30px;
+  border-radius: 5px;
+  background: white;
+}
+
+.login__button > button:hover {
+  background-color: lightyellow;
+  cursor: pointer;
+}

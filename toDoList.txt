@@ -8,3 +8,4 @@
 +Not pushing components in state
 +Hamburger menu
 +More components less repeat
++Task 4.2
