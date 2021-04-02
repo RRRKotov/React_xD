@@ -5,6 +5,7 @@ import { ContainerItem } from "./components/containerItem/ContainerItem.js";
 import { ListItem } from "./components/listItem/ListItem.js";
 import { MobileListItem } from "./components/mobileListItem/MobileListItem.js";
 import { NavigationItem } from "./components/navigationItem/NavigationItem.js";
+import { Redirect } from "react-router-dom";
 
 export const App = () => {
   const [newArray, setNewArray] = useState(data);
@@ -12,6 +13,10 @@ export const App = () => {
   const [mobileStyles, setMobileStyles] = useState({ display: "none" });
 
   const [containerStyles, setContainerStyles] = useState({ display: "block" });
+
+  if (sessionStorage.isLogged !== "1") {
+    return <Redirect to={"/login"} />;
+  }
 
   let newData = data;
 
