@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
-import data from "./data.json";
 import { ContainerItem } from "./components/containerItem/ContainerItem.js";
 import { ListItem } from "./components/listItem/ListItem.js";
 import { MobileListItem } from "./components/mobileListItem/MobileListItem.js";
@@ -8,17 +7,31 @@ import { NavigationItem } from "./components/navigationItem/NavigationItem.js";
 import { Redirect } from "react-router-dom";
 
 export const App = () => {
-  const [newArray, setNewArray] = useState(data);
+  const [newArray, setNewArray] = useState([]);
 
   const [mobileStyles, setMobileStyles] = useState({ display: "none" });
 
   const [containerStyles, setContainerStyles] = useState({ display: "block" });
 
+  let getServerRequest = (value) => {
+    fetch(`http://localhost:5000/data?value=${value}`, {
+      method: "get",
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((dataFromServer) => {
+        setNewArray(dataFromServer);
+      });
+  };
+
+  useEffect(() => {
+    getServerRequest("");
+  }, []);
+
   if (sessionStorage.isLogged !== "1") {
     return <Redirect to={"/login"} />;
   }
-
-  let newData = data;
 
   let whySpringArray = [
     "Overview",
@@ -48,14 +61,7 @@ export const App = () => {
   let communityArray = ["Overview", "Events", "Team"];
 
   let InputChange = (e) => {
-    newData = data.filter((item) => {
-      return (
-        item.content.toUpperCase().includes(e.target.value.toUpperCase()) ||
-        item.title.toUpperCase().includes(e.target.value.toUpperCase())
-      );
-    });
-
-    setNewArray(newData);
+    getServerRequest(e.target.value);
   };
 
   let mobileOpenClose = () => {

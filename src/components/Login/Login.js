@@ -11,14 +11,26 @@ export const Login = () => {
   const [errorStyle, setErrorStyle] = useState({ visibility: "hidden" });
 
   const buttonOnClickHandler = () => {
-    if (username === "admin" && password === "1234") {
-      sessionStorage.isLogged = 1;
+    postServerRequest(username, password);
+  };
 
-      history.push("/");
-    } else {
-      sessionStorage.isLogged = 0;
-      setErrorStyle({ visibility: "visible " });
-    }
+  const postServerRequest = (username, password) => {
+    let userData = { username: username, password: password };
+    fetch(`http://localhost:5000/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    }).then((response) => {
+      if (response.status === 202) {
+        sessionStorage.isLogged = 1;
+        history.push("/");
+      } else {
+        sessionStorage.isLogged = 0;
+        setErrorStyle({ visibility: "visible " });
+      }
+    });
   };
 
   const onChangeUsername = (e) => {
