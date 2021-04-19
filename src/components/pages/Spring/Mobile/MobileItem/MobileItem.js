@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { ListItem } from "../listItem/ListItem.js";
-export const MobileListItem = (props) => {
+import { ListItem } from "../../../../reusableComponents/ListItem/ListItem.js";
+export const MobileItem = (props) => {
   const [listStyle, setListStyle] = useState({ display: "none" });
 
   const [arrowStyles, setLArrowStyles] = useState({
@@ -22,11 +22,11 @@ export const MobileListItem = (props) => {
   };
   return (
     <React.Fragment>
-      <div onClick={onClickHandler} className={props.props.titleClass}>
+      <div onClick={onClickHandler}>
         <div className="mobile__title">{props.props.content}</div>
         <div style={arrowStyles} className="mobile__arrow"></div>
       </div>
-      <div style={listStyle} className={props.props.listClass}>
+      <div style={listStyle} className="mobile__ul">
         <ul className=" ul">{<ListItem props={props.props.array} />}</ul>
       </div>
     </React.Fragment>

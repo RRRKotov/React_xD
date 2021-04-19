@@ -6,7 +6,6 @@
 .mobile {
   width: 100%;
   height: 100%;
-  display: none;
   z-index: 99;
 }
 
@@ -101,7 +100,7 @@
   color: #98afae;
 }
 
-.mobile__ul a:hover {
+.mobile a:hover {
   color: #6db33f;
 }
 
@@ -133,33 +132,33 @@
 }
 
 @font-face {
-  src: url(./fonts/OpenSans-Bold.ttf);
+  src: url("../../../media/fonts/OpenSans-Bold.ttf");
   font-family: OpenSansBold;
 }
 
 @font-face {
-  src: url(./fonts/open-sans.otf);
+  src: url("../../../media/fonts/open-sans.otf");
   font-family: OpenSans;
+}
+
+@font-face {
+  src: url("../../../media/fonts/Metropolis-Bold.otf");
+  font-family: Metropolis;
+}
+
+@font-face {
+  src: url("../../../media/fonts/Metropolis-Medium.otf");
+  font-family: MetropolisMedium;
+}
+
+@font-face {
+  src: url("../../../media/fonts/metropolis.regular.otf");
+  font-family: MetropolisRegular;
 }
 
 .navCont__logo img {
   height: 48px;
   max-width: 250px;
-}
-
-@font-face {
-  src: url(./fonts/Metropolis-Bold.otf);
-  font-family: Metropolis;
-}
-
-@font-face {
-  src: url(./fonts/Metropolis-Medium.otf);
-  font-family: MetropolisMedium;
-}
-
-@font-face {
-  src: url(./fonts/metropolis.regular.otf);
-  font-family: MetropolisRegular;
 }
 
 .nav {
@@ -184,9 +183,12 @@
   margin-right: 0px;
 }
 
-.navCont__list > div {
+.navCont__button {
+  margin-top: 30px;
+}
+
+.navCont__block {
   box-sizing: border-box;
-  padding-top: 25px;
   height: 100%;
   margin-right: 30px;
   font-size: 0.9375rem;
@@ -196,6 +198,11 @@
   -webkit-user-select: none;
   -ms-user-select: none;
   -moz-user-select: none;
+}
+
+.navCont__block:hover :nth-child(2) {
+  visibility: visible;
+  opacity: 1;
 }
 
 .navCont__hamburger {
@@ -230,6 +237,8 @@
 .input {
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
   margin-left: 200px;
 }
 
@@ -247,9 +256,14 @@
   color: white;
 }
 
+.container__noResult {
+  margin: 0 auto;
+
+  font-size: 22px;
+}
+
 .projects {
   display: flex;
-  /* flex-direction: column; */
   align-items: center;
   justify-content: center;
   height: 390px;
@@ -302,7 +316,7 @@
   flex-wrap: wrap;
   margin: 0px auto 0px auto;
   box-sizing: border-box;
-  padding: 35px 2px 35px 220px;
+  padding: 20px 2px 0px 220px;
 }
 
 .container__item {
@@ -357,11 +371,6 @@
   color: #333333;
 }
 
-.container__noresults {
-  font-family: MetropolisMedium;
-  margin-left: 280px;
-}
-
 .navCont {
   display: flex;
   justify-content: space-between;
@@ -375,12 +384,14 @@
 
 .navCont__list ul {
   position: absolute;
-  width: 230px;
+  font-size: 16px;
+  width: auto;
   background: white;
-  font-family: MetropolisRegular;
-  padding: 30px 0 30px 30px;
+  font-family: OpenSans !important;
+  font-weight: 400;
+  padding: 25px;
   box-sizing: border-box;
-  top: 72px;
+  top: 56px;
   border-radius: 5px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
   opacity: 0;
@@ -413,40 +424,6 @@
   width: 190px !important;
 }
 
-.navCont__whySpring {
-  left: 0px;
-}
-
-.navCont__learn {
-  left: 120px;
-}
-
-.navCont__project {
-  left: 200px;
-}
-
-.navCont__whySpring_button:hover ~ .navCont__whySpring {
-  opacity: 1;
-  visibility: visible;
-}
-
-.navCont__list ul:hover {
-  visibility: visible;
-  opacity: 1;
-}
-.navCont__learn_button:hover ~ .navCont__learn {
-  opacity: 1;
-  visibility: visible;
-}
-.navCont__projects_button:hover ~ .navCont__project {
-  opacity: 1;
-  visibility: visible;
-}
-.navCont__community_button:hover ~ .navCont__community {
-  opacity: 1;
-  visibility: visible;
-}
-
 @media screen and (max-width: 1200px) {
   .navCont__list {
     padding-right: 50px;
@@ -461,9 +438,6 @@
   .container__main {
     width: 1000px;
     padding: 35px 0px 35px 8px;
-  }
-  .navCont__list ul {
-    width: 210px;
   }
   .navCont__community {
     right: -10px;
