@@ -1,0 +1,38 @@
+.navCont__list a {
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+  color: #333333;
+}
+.navCont__list a:visited {
+  color: #191e1e;
+}
+
+.navCont__list :last-child {
+  margin-right: 0px;
+}
+
+.navCont__list a:hover {
+  color: #6db33f !important;
+}
+
+.navCont__list {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  padding-right: 0px;
+  height: 100%;
+  min-width: 590px;
+}
+
+@media screen and (max-width: 1200px) {
+  .navCont__list {
+    padding-right: 50px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .navCont__list {
+    display: none;
+  }
+}

@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Spring.css";
 import { Context } from "./hooks/Context.js";
 
 import { Mobile } from "./Mobile/Mobile.js";
-import { Redirect } from "react-router-dom";
+
 import { Header } from "./Header/Header.js";
 import { Projects } from "./Projects/Projects.js";
 import { Container } from "./Container/Container.js";
+import { useHistory } from "react-router-dom";
 
 export const Spring = () => {
   const [mobileStyles, setMobileStyles] = useState({ display: "none" });
@@ -19,9 +20,14 @@ export const Spring = () => {
     setMobileStyles({ display: "none" });
   };
 
-  if (sessionStorage.isLogged !== "1") {
-    return <Redirect to={"/login"} />;
-  }
+  const history = useHistory();
+
+  useEffect(() => {
+    if (sessionStorage.isLogged !== "1") {
+      history.push("/login");
+    }
+  });
+
   return (
     <Context.Provider value={{ openMobile, closeMobile, mobileStyles }}>
       <Mobile />

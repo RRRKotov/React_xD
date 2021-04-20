@@ -1,0 +1,53 @@
+.projects {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 390px;
+  padding: 105px 0px 90px 0px;
+  margin-left: 20px;
+  box-sizing: border-box;
+}
+
+.projects__cont {
+  display: flex;
+  flex-direction: column;
+  width: 1180px;
+  box-sizing: border-box;
+}
+
+.projects__textName {
+  font-family: Metropolis, sans-serif;
+  font-size: 3.75rem;
+  color: #191e1e;
+}
+
+.projects__text {
+  margin-top: 24px;
+  font-family: MetropolisRegular;
+  font-size: 24px;
+  line-height: 41px;
+}
+
+@media screen and (max-width: 1200px) {
+  .projects__cont {
+    padding-right: 20px;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .projects {
+    height: 450px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .projects__textName {
+    font-size: 50px;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .projects__text {
+    font-size: 18px;
+  }
+}

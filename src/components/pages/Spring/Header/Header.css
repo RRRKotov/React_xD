@@ -1,0 +1,40 @@
+.nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 73px;
+  color: #191e1e;
+}
+
+.nav hr {
+  display: block;
+  margin: 0px;
+  width: 100%;
+  height: 1px;
+  border: 0;
+  background: rgb(235, 242, 242);
+}
+
+.navCont {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 0 20px;
+  height: 100%;
+  width: 1180px;
+  box-sizing: border-box;
+}
+
+@media screen and (max-width: 1200px) {
+  .navCont {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .nav {
+    height: 45px;
+  }
+}

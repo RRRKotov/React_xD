@@ -1,0 +1,44 @@
+.navCont__block ul {
+    position: absolute;
+    font-size: 16px;
+    width: auto;
+    background: white;
+    font-family: OpenSans !important;
+    font-weight: 400;
+    padding: 25px;
+    box-sizing: border-box;
+    top: 56px;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.2s opacity, 0.2s visibility;
+  }
+  .navCont__block li {
+    list-style-type: none;
+    line-height: 30px;
+  }
+  
+  .navCont__block img {
+    margin-left: 3px;
+    height: 10px;
+    opacity: 0.7;
+  }
+
+  .navCont__block {
+    box-sizing: border-box;
+    height: 100%;
+    margin-right: 30px;
+    font-size: 0.9375rem;
+    display: inline-block;
+    font-family: Metropolis;
+    font-weight: 700;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none;
+  }
+  
+  .navCont__block:hover :nth-child(2) {
+    visibility: visible;
+    opacity: 1;
+  }

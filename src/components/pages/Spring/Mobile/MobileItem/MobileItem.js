@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ListItem } from "../../../../reusableComponents/ListItem/ListItem.js";
+import "./MobileItem.css";
 export const MobileItem = (props) => {
   const [listStyle, setListStyle] = useState({ display: "none" });
 
@@ -8,7 +9,7 @@ export const MobileItem = (props) => {
     margin: "0 0 0 5px",
   });
 
-  let onClickHandler = () => {
+  const onClickHandler = () => {
     if (listStyle.display === "none") {
       setListStyle({ display: "block" });
       setLArrowStyles({
@@ -22,7 +23,7 @@ export const MobileItem = (props) => {
   };
   return (
     <React.Fragment>
-      <div onClick={onClickHandler}>
+      <div className="mobile__block" onClick={onClickHandler}>
         <div className="mobile__title">{props.props.content}</div>
         <div style={arrowStyles} className="mobile__arrow"></div>
       </div>

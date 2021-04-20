@@ -1,0 +1,33 @@
+.navCont__logo img {
+  height: 48px;
+  max-width: 250px;
+}
+
+.navCont__logo a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.navCont__logo {
+  position: relative;
+  width: 200px;
+  height: 100%;
+}
+
+@media screen and (max-width: 1200px) {
+  .navCont__logo {
+    width: 115px;
+  }
+  .navCont__logo img {
+    width: 115px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .navCont__logo img {
+    height: 44px;
+  }
+}

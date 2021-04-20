@@ -1,4 +1,5 @@
 import React from "react";
+import "./NavigationItem.css"
 import arrowImage from "./media/arrow-down-sign-to-navigate.svg";
 import { ListItem } from "../../../../../reusableComponents/ListItem/ListItem.js";
 export const NavigationItem = (props) => {

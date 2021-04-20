@@ -1,0 +1,29 @@
+.container__body > img {
+  width: 69px;
+  height: 60px;
+}
+
+.container__body {
+  width: 100%;
+  height: 170px;
+}
+
+.container__text {
+  width: 75%;
+  font-family: MetropolisRegular;
+  font-size: 16px;
+  margin: 20px 0 0 90px;
+  line-height: 27px;
+  color: #333333;
+}
+
+@media screen and (max-width: 400px) {
+  .container__text {
+    width: auto;
+    margin: 0px 0 0 75px;
+    font-size: 15px;
+  }
+  .container__name {
+    margin-left: -20px;
+  }
+}

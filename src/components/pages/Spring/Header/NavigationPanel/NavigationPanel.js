@@ -1,4 +1,5 @@
 import React from "react";
+import "./NavigationPanel.css"
 import Data from "../../../../../dataSets/Data.json";
 import { NavigationItem } from "./NavigationItem/NavigationItem.js";
 
@@ -16,3 +17,4 @@ export const NavigationPanel = () => {
     </div>
   );
 };
+

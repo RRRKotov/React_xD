@@ -4,6 +4,7 @@ import Data from "../../../../dataSets/Data.json";
 import { MobileLink } from "./MobileLink/MobileLink.js";
 import { Context } from "../hooks/Context.js";
 import React, { useContext } from "react";
+import "./Mobile.css"
 export const Mobile = () => {
   const methods = useContext(Context);
 
@@ -26,3 +27,4 @@ export const Mobile = () => {
     </div>
   );
 };
+

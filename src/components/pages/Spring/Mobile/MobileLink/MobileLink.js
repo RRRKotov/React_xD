@@ -2,7 +2,7 @@ import React from 'react'
 
 export const MobileLink = ({props}) => {
     return (
-        <div>
+        <div className="mobile__block">
         <a href="/#">{props}</a>
       </div>
     )

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./Container.css";
 import { ContainerItem } from "./ContainerItem/ContainerItem.js";
 
 export const Container = () => {
@@ -9,7 +10,7 @@ export const Container = () => {
   const [toggleNoResult, setToggleNoResult] = useState({
     visibility: "hidden",
   });
-  let InputChange = (e) => {
+  const inputChange = (e) => {
     getServerRequest(e.target.value);
   };
 
@@ -21,7 +22,7 @@ export const Container = () => {
     }
   }, [newArray]);
 
-  let getServerRequest = (value) => {
+  const getServerRequest = (value) => {
     fetch(`http://localhost:5000/data?value=${value}`, {
       method: "get",
     })
@@ -36,7 +37,7 @@ export const Container = () => {
   return (
     <div className="container">
       <div className="input">
-        <input onChange={InputChange} type="text" placeholder="search" />
+        <input onChange={inputChange} type="text" placeholder="search" />
         <div className="container__noResult" style={toggleNoResult}>
           No Results(
         </div>
