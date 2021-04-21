@@ -4,14 +4,14 @@ import { ContainerItem } from "./ContainerItem/ContainerItem.js";
 
 export const Container = () => {
   useEffect(() => {
-    getServerRequest("");
+    getInitialData();
   }, []);
   const [newArray, setNewArray] = useState([]);
   const [toggleNoResult, setToggleNoResult] = useState({
     visibility: "hidden",
   });
   const inputChange = (e) => {
-    getServerRequest(e.target.value);
+    getFilteredData(e.target.value);
   };
 
   useEffect(() => {
@@ -22,8 +22,20 @@ export const Container = () => {
     }
   }, [newArray]);
 
-  const getServerRequest = (value) => {
-    fetch(`http://localhost:5000/data?value=${value}`, {
+  const getInitialData = () => {
+    fetch(`http://localhost:5000/getInitialData`, {
+      method: "get",
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((dataFromServer) => {
+        setNewArray(dataFromServer);
+      });
+  };
+
+  const getFilteredData = (value) => {
+    fetch(`http://localhost:5000/filter?value=${value}`, {
       method: "get",
     })
       .then((response) => {

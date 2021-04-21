@@ -1,3 +1,5 @@
+db = require("./database.js");
+
 const data = [
   {
     img: "/imagesFromServer/spring-boot-7f2e24fb962501672cc91ccd285ed2ba.svg",
@@ -51,16 +53,48 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get("/data", function (request, response) {
-  let value = request.query.value;
+// app.get("/data", function (request, response) {
+//   let value = request.query.value;
 
-  let newData = data.filter((item) => {
-    return (
-      item.content.toUpperCase().includes(value.toUpperCase()) ||
-      item.title.toUpperCase().includes(value.toUpperCase())
+//   let newData = data.filter((item) => {
+//     return (
+//       item.content.toUpperCase().includes(value.toUpperCase()) ||
+//       item.title.toUpperCase().includes(value.toUpperCase())
+//     );
+//   });
+//   response.send(newData);
+// });
+
+app.get("/filter", (req, response) => {
+  let value = req.query.value.toUpperCase();
+  let filter = db.query(
+    "SELECT * FROM projects WHERE UPPER(title)  LIKE $1 OR UPPER(content)  LIKE $1 ",
+    ["%" + value + "%"],
+    (err, res) => {
+      response.json(res.rows);
+    }
+  );
+});
+
+app.get("/createInitialData", (req, response) => {
+  data.forEach((item) => {
+    let createInitialData = db.query(
+      "INSERT INTO projects (img, title, content) values($1, $2, $3)",
+      [item.img, item.title, item.content]
     );
   });
-  response.send(newData);
+});
+
+app.get("/getInitialData", (req, response) => {
+  let selectAll = db.query("SELECT * FROM projects", (err, res) => {
+    response.json(res.rows);
+  });
+});
+
+app.get("/truncateProjects", (req, res) => {
+  let result = db.query("TRUNCATE TABLE projects ");
+
+  res.send("deleted");
 });
 
 app.post("/login", function (request, response) {
