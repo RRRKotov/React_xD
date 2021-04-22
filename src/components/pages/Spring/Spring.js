@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./Spring.css";
+
 import { Context } from "./hooks/Context.js";
 
 import { Mobile } from "./Mobile/Mobile.js";

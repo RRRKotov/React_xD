@@ -53,18 +53,6 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// app.get("/data", function (request, response) {
-//   let value = request.query.value;
-
-//   let newData = data.filter((item) => {
-//     return (
-//       item.content.toUpperCase().includes(value.toUpperCase()) ||
-//       item.title.toUpperCase().includes(value.toUpperCase())
-//     );
-//   });
-//   response.send(newData);
-// });
-
 app.get("/filter", (req, response) => {
   let value = req.query.value.toUpperCase();
   let filter = db.query(
@@ -76,7 +64,7 @@ app.get("/filter", (req, response) => {
   );
 });
 
-app.get("/createInitialData", (req, response) => {
+app.get("/insertProject", (req, response) => {
   data.forEach((item) => {
     let createInitialData = db.query(
       "INSERT INTO projects (img, title, content) values($1, $2, $3)",
@@ -104,6 +92,43 @@ app.post("/login", function (request, response) {
     response.sendStatus(401);
   }
 });
+
+app.post("/signup", function (request, response) {
+  console.log(request.body);
+
+  // if (request.body.username.length < 3) {
+  //   console.log("username<3");
+  // }
+  // if (request.body.password.length < 4) {
+  //   console.log("lastName<3");
+  // }
+  // if (request.body.password !== request.body.repeatPassword) {
+  //   console.log("diff passwords");
+  // }
+  // if (request.body.firstName.length < 3) {
+  //   console.log("firstName<3");
+  // }
+  // if (request.body.lastName.length < 3) {
+  //   console.log("lastName<3");
+  // }
+  // if (parseInt(request.body.age, 10) < 0) {
+  //   console.log("age cant be a zero");
+  // }
+  // {
+  //   console.log("accepted");
+  // }
+
+
+//   reg 4 
+//   first name and last name /^[A-Z]{1}+[a-z]{2,}+$/gm
+//   password /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/
+//   username /^[a-zA-Z0-9]{3,}$/
+
+});
+
+const passwordRegex=/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/
+const password="12ee"
+console.log((passwordRegex.test(password)))
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

@@ -1,0 +1,24 @@
+@font-face {
+    src: url("./media/fonts/OpenSans-Bold.ttf");
+    font-family: OpenSansBold;
+  }
+  
+  @font-face {
+    src: url("./media/fonts/open-sans.otf");
+    font-family: OpenSans;
+  }
+  
+  @font-face {
+    src: url("./media/fonts/Metropolis-Bold.otf");
+    font-family: Metropolis;
+  }
+  
+  @font-face {
+    src: url("./media/fonts/Metropolis-Medium.otf");
+    font-family: MetropolisMedium;
+  }
+  
+  @font-face {
+    src: url("./media/fonts/metropolis.regular.otf");
+    font-family: MetropolisRegular;
+  }
