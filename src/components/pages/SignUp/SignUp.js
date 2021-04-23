@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import "./SignUp.css";
+import data from "./SignUp.json";
+import { SignUpInput } from "./SignUpInput/SignUpInput.js";
+import { useHistory } from "react-router-dom";
 
 export const SignUp = () => {
+  const history = useHistory();
+  const [errors, setErrors] = useState(data);
   const handleOnSubmit = (e) => {
     e.preventDefault();
     let myForm = e.target;
@@ -13,7 +18,22 @@ export const SignUp = () => {
         "Content-Type": "application/json",
       },
       body: data4Server,
-    });
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((errObj) => {
+        setErrors(errObj.errors);
+        errObj.forEach((item, index) => {
+          data[index].errorStatus = item;
+        });
+        setErrors(data);
+      });
+  };
+
+  const goToLogin = (e) => {
+    e.preventDefault();
+    history.push("/login");
   };
 
   function convertFormData2JSON(formData) {
@@ -34,43 +54,16 @@ export const SignUp = () => {
           onSubmit={handleOnSubmit}
           action="#"
         >
-          <input
-            className="signup__input"
-            name="username"
-            placeholder="username"
-            type="text"
-          />
-          <input
-            className="signup__input"
-            name="password"
-            placeholder="password"
-            type="password"
-          />
-          <input
-            className="signup__input"
-            placeholder="repeat password"
-            name="repeatPassword"
-            type="password"
-          />
-          <input
-            className="signup__input"
-            placeholder="firstName"
-            name="firstName"
-            type="text"
-          />
-          <input
-            className="signup__input"
-            placeholder="last name"
-            name="lastName"
-            type="text"
-          />
-          <input
-            className="signup__input"
-            name="age"
-            placeholder="age"
-            type="number"
-          />
-          <button className="signup__submit">Submit</button>
+          {data.map((item) => (
+            <SignUpInput props={item} key={item.id} />
+          ))}
+          <div className="buttons">
+            <button className="signup__submit">Submit</button>
+            <p>OR</p>
+            <button onClick={goToLogin} className="signup__submit">
+              Login
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -3,13 +3,30 @@ import "./Container.css";
 import { ContainerItem } from "./ContainerItem/ContainerItem.js";
 
 export const Container = () => {
+  const [isMount, setIsMount] = useState(true);
   useEffect(() => {
-    getInitialData();
-  }, []);
+    setIsMount(true);
+    if (isMount) {
+      fetch(`http://localhost:5000/getInitialData`, {
+        method: "get",
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((dataFromServer) => {
+          setNewArray(dataFromServer);
+        });
+    }
+
+    return () => {
+      setIsMount(false);
+    };
+  }, [isMount]);
   const [newArray, setNewArray] = useState([]);
   const [toggleNoResult, setToggleNoResult] = useState({
     visibility: "hidden",
   });
+
   const inputChange = (e) => {
     getFilteredData(e.target.value);
   };
@@ -21,18 +38,6 @@ export const Container = () => {
       setToggleNoResult({ visibility: "hidden" });
     }
   }, [newArray]);
-
-  const getInitialData = () => {
-    fetch(`http://localhost:5000/getInitialData`, {
-      method: "get",
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((dataFromServer) => {
-        setNewArray(dataFromServer);
-      });
-  };
 
   const getFilteredData = (value) => {
     fetch(`http://localhost:5000/filter?value=${value}`, {

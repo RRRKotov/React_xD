@@ -32,9 +32,15 @@
   width: 250px;
   border-radius: 5px;
 }
+.login__button {
+  margin-top: 3px;
+  width: 258px;
+  display: flex;
+  justify-content: space-between;
+}
 
 .login__button > button {
-  width: 150px;
+  width: 110px;
   height: 30px;
   border-radius: 5px;
   background: white;

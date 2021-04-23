@@ -1,0 +1,26 @@
+.signup__input {
+  width: 250px;
+  height: 30px;
+  border-radius: 10px;
+  outline: none;
+  -webkit-appearance: none;
+  box-shadow: none !important;
+  /* margin-bottom: 30px; */
+  background-color: blueviolet;
+  color: white;
+  font-size: 20px;
+}
+.signup__input::-webkit-outer-spin-button,
+.signup__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.signup__input::placeholder {
+  color: Gainsboro;
+}
+
+.signup__error {
+  margin-bottom: 7px;
+  color: red;
+}

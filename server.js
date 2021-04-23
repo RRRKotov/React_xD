@@ -1,46 +1,5 @@
 db = require("./database.js");
-
-const data = [
-  {
-    img: "/imagesFromServer/spring-boot-7f2e24fb962501672cc91ccd285ed2ba.svg",
-    title: "Spring Boot",
-    content:
-      "Takes an opinionated view of building Spring applications and gets you up and running as quickly as possible.",
-  },
-  {
-    img:
-      "/imagesFromServer/spring-framework-640ad1b04f7efa89e0f0f7353e6b5e02.svg",
-    title: "Spring Framework",
-    content:
-      "Provides core support for dependency injection, transaction management, web apps, data access, messaging, and more.",
-  },
-  {
-    img: "/imagesFromServer/spring-data-79cc203ed8c54191215a60f9e5dc638f.svg",
-    title: "Spring Data",
-    content:
-      "Provides a consistent approach to data access – relational, non-relational, map-reduce, and beyond.",
-  },
-  {
-    img: "/imagesFromServer/spring-cloud-81fe04ab129ab99da0e7c7115bb09920.svg",
-    title: "Spring Cloud",
-    content:
-      " Provides a set of tools for common patterns in distributed systems. Useful for building and deploying microservices.",
-  },
-  {
-    img:
-      "/imagesFromServer/spring-data-flow-9eb1733b76b6cd62cbdd9bc9a2b04e56.svg",
-    title: "Spring Cloud Data Flow",
-    content:
-      "Provides an orchestration service for composable data microservice applications on modern runtimes.",
-  },
-  {
-    img:
-      "/imagesFromServer/spring-security-b712a4cdb778e72eb28b8c55ec39dbd1.svg",
-    title: "Spring Security",
-    content:
-      "Protects your application with comprehensive and extensible authentication and authorization support.",
-  },
-];
+const bcrypt = require("bcrypt");
 
 const express = require("express");
 const app = express();
@@ -93,42 +52,71 @@ app.post("/login", function (request, response) {
   }
 });
 
-app.post("/signup", function (request, response) {
+app.post("/signup", async function (request, response) {
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/;
+  const nameRegex = /^[A-Z]{1}[a-z]{2,}$/gm;
+  const usernameRegex = /^[a-zA-Z0-9]{3,}$/;
   console.log(request.body);
+  let errObj = {
+    errors: [],
+  };
 
-  // if (request.body.username.length < 3) {
-  //   console.log("username<3");
-  // }
-  // if (request.body.password.length < 4) {
-  //   console.log("lastName<3");
-  // }
-  // if (request.body.password !== request.body.repeatPassword) {
-  //   console.log("diff passwords");
-  // }
-  // if (request.body.firstName.length < 3) {
-  //   console.log("firstName<3");
-  // }
-  // if (request.body.lastName.length < 3) {
-  //   console.log("lastName<3");
-  // }
-  // if (parseInt(request.body.age, 10) < 0) {
-  //   console.log("age cant be a zero");
-  // }
-  // {
-  //   console.log("accepted");
-  // }
+  if (request.body.username.search(usernameRegex)) {
+    errObj.errors.push(1);
+  } else {
+    errObj.errors.push(0);
+  }
+  if (request.body.password.search(passwordRegex)) {
+    errObj.errors.push(1);
+  } else {
+    errObj.errors.push(0);
+  }
+  if (request.body.password !== request.body.repeatPassword) {
+    errObj.errors.push(1);
+  } else {
+    errObj.errors.push(0);
+  }
+  if (request.body.firstName.search(nameRegex)) {
+    errObj.errors.push(1);
+  } else {
+    errObj.errors.push(0);
+  }
+  if (request.body.lastName.search(nameRegex)) {
+    errObj.errors.push(1);
+  } else {
+    errObj.errors.push(0);
+  }
+  if (!(parseInt(request.body.age, 10) > 0)) {
+    errObj.errors.push(1);
+  } else {
+    errObj.errors.push(0);
+  }
 
-
-//   reg 4 
-//   first name and last name /^[A-Z]{1}+[a-z]{2,}+$/gm
-//   password /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/
-//   username /^[a-zA-Z0-9]{3,}$/
-
+  console.log(errObj.errors);
+  response.send(errObj.errors);
+  const isCorrect = errObj.errors.reduce((a, b) => a + b, 0);
+  console.log("'" + request.body.username + "'");
+  const selectUser = db.query(
+    "SELECT FROM users WHERE username=$1",
+    ["'" + request.body.username + "'"],
+    async (err, res) => {
+      if (res.rowCount == 0 && isCorrect === 0) {
+        const hashedPassword = await bcrypt.hash(request.body.password, 10);
+        let selectAll = db.query(
+          "INSERT INTO users (username, password, first_name, last_name, age) values($1, $2, $3, $4, $5)",
+          [
+            request.body.username,
+            hashedPassword,
+            request.body.firstName,
+            request.body.lastName,
+            request.body.age,
+          ],
+          (err, res) => {}
+        );
+      }
+    }
+  );
 });
-
-const passwordRegex=/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/
-const password="12ee"
-console.log((passwordRegex.test(password)))
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

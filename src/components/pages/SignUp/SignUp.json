@@ -1,0 +1,44 @@
+[
+    {"name":"username",
+    "placeholder":"username",
+    "type":"text",
+    "id":"0",
+    "errorMessage":"Must contain at least 3 symbols",
+    "errorStatus":0},
+
+    { "name":"password",
+    "placeholder":"password",
+    "type":"password",
+    "id":"1",
+    "errorMessage":"Must contain at least 4 symbols at least 1 letter and 1 number",
+    "errorStatus":0},
+
+    {  "placeholder":"repeat password",
+    "name":"repeatPassword",
+    "type":"password",
+    "id":"2",
+    "errorMessage":"Passwords don`t match",
+    "errorStatus":0},
+
+    {  
+    "placeholder":"firstName",
+    "name":"firstName",
+    "type":"text",
+    "id":"3",
+    "errorMessage":"First letter is capital, at least 3 letters",
+    "errorStatus":0},
+
+    { "placeholder":"last name",
+    "name":"lastName",
+    "type":"text",
+    "id":"4",
+    "errorMessage":"First letter is capital, at least 3 letters",
+    "errorStatus":0},
+
+    { "name":"age",
+    "placeholder":"age",
+    "type":"number",
+    "id":"5",
+    "errorMessage":"Age must be a positive number",
+    "errorStatus":0}
+]

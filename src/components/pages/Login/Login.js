@@ -32,6 +32,9 @@ export const Login = () => {
       }
     });
   };
+  const signUpRedirect = () => {
+    history.push("/signup");
+  };
 
   const onChangeUsername = (e) => {
     setUsername(e.target.value);
@@ -63,7 +66,8 @@ export const Login = () => {
           <span>Wrong username or password(( Try again! </span>
         </div>
         <div className="login__button">
-          <button onClick={buttonOnClickHandler}>Submit</button>
+          <button onClick={buttonOnClickHandler}>Login</button>OR
+          <button onClick={signUpRedirect}>Signup</button>
         </div>
       </div>
     </div>
