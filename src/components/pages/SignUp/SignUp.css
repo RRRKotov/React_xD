@@ -53,3 +53,7 @@
 .signup__submit:hover {
   cursor: pointer;
 }
+
+.signup__message {
+  color: red;
+}

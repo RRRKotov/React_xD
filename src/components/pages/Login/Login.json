@@ -1,0 +1,15 @@
+[
+    {"name":"username",
+    "placeholder":"username",
+    "type":"text",
+    "id":"0",
+    "errorMessage":"Wrong Login",
+    "errorStatus":0},
+
+    { "name":"password",
+    "placeholder":"password",
+    "type":"password",
+    "id":"1",
+    "errorMessage":"Wrong password",
+    "errorStatus":0}
+]

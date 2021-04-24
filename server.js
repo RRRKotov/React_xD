@@ -44,12 +44,43 @@ app.get("/truncateProjects", (req, res) => {
   res.send("deleted");
 });
 
-app.post("/login", function (request, response) {
-  if (request.body.username == "admin" && request.body.password == "1234") {
-    response.sendStatus(202);
-  } else {
-    response.sendStatus(401);
-  }
+app.post("/login", async function (request, response) {
+  const loginObj = {
+    errors: [],
+    isInvalid: 1,
+  };
+
+  await db.query(
+    "SELECT FROM users WHERE username='" + request.body.username + "'",
+    async (err, res) => {
+      if (res.rowCount == 0) {
+        loginObj.errors.push(1);
+
+        response.send(loginObj);
+      } else {
+        loginObj.errors.push(0);
+        await db.query(
+          "SELECT password FROM users WHERE username='" +
+            request.body.username +
+            "'",
+          async (err, res) => {
+            const hashedPassword = res.rows[0].password;
+            const isMatch = await bcrypt.compare(
+              request.body.password,
+              hashedPassword
+            );
+            if (isMatch == true) {
+            } else {
+              loginObj.errors.push(1);
+            }
+            const isInvalid = loginObj.errors.reduce((a, b) => a + b, 0);
+            loginObj.isInvalid = isInvalid;
+            response.send(loginObj);
+          }
+        );
+      }
+    }
+  );
 });
 
 app.post("/signup", async function (request, response) {
@@ -59,6 +90,8 @@ app.post("/signup", async function (request, response) {
   console.log(request.body);
   let errObj = {
     errors: [],
+    loginExists: "",
+    isInvalid: 1,
   };
 
   if (request.body.username.search(usernameRegex)) {
@@ -92,17 +125,19 @@ app.post("/signup", async function (request, response) {
     errObj.errors.push(0);
   }
 
-  console.log(errObj.errors);
-  response.send(errObj.errors);
-  const isCorrect = errObj.errors.reduce((a, b) => a + b, 0);
-  console.log("'" + request.body.username + "'");
-  const selectUser = db.query(
-    "SELECT FROM users WHERE username=$1",
-    ["'" + request.body.username + "'"],
+  await db.query(
+    "SELECT FROM users WHERE username='" + request.body.username + "'",
     async (err, res) => {
-      if (res.rowCount == 0 && isCorrect === 0) {
+      const isInvalid = errObj.errors.reduce((a, b) => a + b, 0);
+      console.log(res.rowCount);
+      if (res.rowCount !== 0) {
+        errObj.loginExists = "User with this login already exists";
+        errObj.errors[0] = 1;
+      }
+      if (res.rowCount === 0 && isInvalid === 0) {
+        errObj.isInvalid = isInvalid;
         const hashedPassword = await bcrypt.hash(request.body.password, 10);
-        let selectAll = db.query(
+        let selectAll = await db.query(
           "INSERT INTO users (username, password, first_name, last_name, age) values($1, $2, $3, $4, $5)",
           [
             request.body.username,
@@ -114,6 +149,8 @@ app.post("/signup", async function (request, response) {
           (err, res) => {}
         );
       }
+      console.log(errObj.errors);
+      response.send(errObj);
     }
   );
 });

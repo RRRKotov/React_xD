@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import "./SignUp.css";
 import data from "./SignUp.json";
-import { SignUpInput } from "./SignUpInput/SignUpInput.js";
+import { Input } from "../../reusableComponents/Input/Input.js";
 import { useHistory } from "react-router-dom";
 
 export const SignUp = () => {
   const history = useHistory();
   const [errors, setErrors] = useState(data);
+  sessionStorage.isLogged = 0;
   const handleOnSubmit = (e) => {
     e.preventDefault();
     let myForm = e.target;
@@ -23,11 +24,20 @@ export const SignUp = () => {
         return response.json();
       })
       .then((errObj) => {
-        setErrors(errObj.errors);
-        errObj.forEach((item, index) => {
+        console.log(errObj);
+        if (errObj.loginExists !== "") {
+          //znau, 4to bad practice
+          //2 different errors 4 0ne input((((
+          data[0].errorMessage = errObj.loginExists;
+        }
+        errObj.errors.forEach((item, index) => {
           data[index].errorStatus = item;
         });
-        setErrors(data);
+        if (errObj.isInvalid === 0) {
+          sessionStorage.isLogged = 1;
+          history.push("/");
+        }
+        setErrors(errObj);
       });
   };
 
@@ -55,7 +65,7 @@ export const SignUp = () => {
           action="#"
         >
           {data.map((item) => (
-            <SignUpInput props={item} key={item.id} />
+            <Input props={item} key={item.id} />
           ))}
           <div className="buttons">
             <button className="signup__submit">Submit</button>

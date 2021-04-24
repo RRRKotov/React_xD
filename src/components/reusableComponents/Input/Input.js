@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "./SignUpInput.css";
+import "./Input.css";
 
-export const SignUpInput = (props) => {
+export const Input = (props) => {
   const [errorStyle, setErrorStyle] = useState({ visibility: "hidden" });
   useEffect(() => {
     if (props.props.errorStatus === 1) {

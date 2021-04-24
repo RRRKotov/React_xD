@@ -1,75 +1,81 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./Login.css";
 import { useHistory } from "react-router-dom";
+import data from "./Login.json";
+import { Input } from "../../reusableComponents/Input/Input.js";
 
 export const Login = () => {
   sessionStorage.setItem("isLogged", 0);
-
+  const [errors, setErrors] = useState("as");
   const history = useHistory();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorStyle, setErrorStyle] = useState({ visibility: "hidden" });
 
-  const buttonOnClickHandler = () => {
-    postServerRequest(username, password);
-  };
-
-  const postServerRequest = (username, password) => {
-    let userData = { username: username, password: password };
+  const handleOnSubmit = (e) => {
+    e.preventDefault();
+    let loginForm = e.target;
+    let formData = new FormData(loginForm);
+    let data4Server = convertFormData2JSON(formData);
     fetch(`http://localhost:5000/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(userData),
-    }).then((response) => {
-      if (response.status === 202) {
-        sessionStorage.isLogged = 1;
-        history.push("/");
-      } else {
-        sessionStorage.isLogged = 0;
-        setErrorStyle({ visibility: "visible " });
-      }
-    });
+      body: data4Server,
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((loginObj) => {
+        loginObj.errors.forEach((item, index) => {
+          data[index].errorStatus = item;
+        });
+        if (loginObj.isInvalid === 0) {
+          sessionStorage.isLogged = 1;
+          history.push("/");
+        }
+        console.log(loginObj);
+        setErrors(loginObj);
+      });
   };
-  const signUpRedirect = () => {
+  console.log(errors.isInvalid);
+
+  function convertFormData2JSON(formData) {
+    let obj = {};
+    for (let key of formData.keys()) {
+      obj[key] = formData.get(key);
+    }
+    return JSON.stringify(obj);
+  }
+
+  const signUpRedirect = (e) => {
+    e.preventDefault();
     history.push("/signup");
   };
 
-  const onChangeUsername = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const onChangePassword = (e) => {
-    setPassword(e.target.value);
-  };
+  useEffect(() => {
+    return () => {
+      if (errors.isInvalid === 0) {
+        sessionStorage.isLogged = 1;
+      }
+    };
+  });
 
   return (
     <div className="login__main">
-      <div className="login__container">
+      <form
+        id="loginForm"
+        className="login__container"
+        onSubmit={handleOnSubmit}
+        action="#"
+      >
         <h1 className="login__title">Login</h1>
-        <div className="login__input">
-          <input
-            onChange={onChangeUsername}
-            type="text"
-            placeholder="username"
-          />
-        </div>
-        <div className="login__input">
-          <input
-            onChange={onChangePassword}
-            type="password"
-            placeholder="password"
-          />
-        </div>
-        <div style={errorStyle} className="login__error">
-          <span>Wrong username or password(( Try again! </span>
-        </div>
+        {data.map((item) => (
+          <Input props={item} key={item.id} />
+        ))}
         <div className="login__button">
-          <button onClick={buttonOnClickHandler}>Login</button>OR
+          <button>Login</button>OR
           <button onClick={signUpRedirect}>Signup</button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };
