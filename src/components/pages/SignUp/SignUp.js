@@ -24,7 +24,6 @@ export const SignUp = () => {
         return response.json();
       })
       .then((errObj) => {
-        console.log(errObj);
         if (errObj.loginExists !== "") {
           //znau, 4to bad practice
           //2 different errors 4 0ne input((((

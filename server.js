@@ -1,10 +1,13 @@
 db = require("./database.js");
 const bcrypt = require("bcrypt");
-
+const CryptoJS = require("crypto-js");
+const { Base64 } = require("js-base64");
 const express = require("express");
 const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const AES = require("crypto-js/aes");
+const { encrypt } = require("crypto-js/aes");
 
 const port = 5000;
 
@@ -156,5 +159,64 @@ app.post("/signup", async function (request, response) {
 });
 
 app.listen(port, () => {
+  const magicKey = "darova";
   console.log(`Server is running at http://localhost:${port}`);
+  const header = { alg: "Base64", typ: "JWT" };
+  const payload = { username: "Vasya", exp: 1581357039 };
+  const hashedHeader = Base64.encode(JSON.stringify(header));
+  console.log("hashed header: " + hashedHeader);
+  const decodedHeader = Base64.decode(hashedHeader);
+  const hashedPayload = Base64.encode(JSON.stringify(payload));
+  console.log("hashed payload: " + hashedPayload);
+  const decodedPayload = Base64.decode(hashedPayload);
+  const headerAndPayload = hashedHeader + "." + hashedPayload;
+  console.log("header and payload " + headerAndPayload);
+  const signature = AES.encrypt(headerAndPayload, magicKey);
+  console.log("signature: " + signature);
+  const decryptedSignature = AES.decrypt(signature, magicKey).toString(
+    CryptoJS.enc.Utf8
+  );
+  console.log("decryptedSignature: " + decryptedSignature);
+  const accessToken = headerAndPayload + "." + signature;
+  const [h1, h2, h3] = accessToken.split(".");
+
+  console.log("access token: " + accessToken);
+
+  const isAccessTokenValid = (accessToken) => {
+    const [hashedHeader, hashedPayload, signature] = accessToken.split(".");
+    const decryptedSignature = AES.decrypt(signature, magicKey).toString(
+      CryptoJS.enc.Utf8
+    );
+    const decryptedPayload = Base64.decode(hashedPayload);
+    const parsedPayload = JSON.parse(decryptedPayload);
+    const currentDate = Date.now();
+    if (
+      hashedHeader + "." + hashedPayload == decryptedSignature &&
+      parsedPayload.exp > currentDate
+    ) {
+      console.log("signature is valid");
+    } else {
+      console.log("signature is not valid");
+    }
+  };
+  isAccessTokenValid(accessToken);
+
+  const refreshPayload = { username: "Vasya", exp: 1581357039 };
+  const refreshToken = AES.encrypt(JSON.stringify(refreshPayload), magicKey);
+  console.log("refresh token: " + refreshToken);
+
+  const isRefreshTokenValid = (refreshToken) => {
+    const decryptedRefreshToken = AES.decrypt(refreshToken, magicKey).toString(
+      CryptoJS.enc.Utf8
+    );
+    const parsedRefreshToken = JSON.parse(decryptedRefreshToken);
+    console.log(parsedRefreshToken.exp);
+    const currentDate = Date.now();
+    if (parsedRefreshToken.exp > currentDate) {
+      console.log("refreshToken is valid");
+    } else {
+      console.log("refreshToken is not valid");
+    }
+  };
+  isRefreshTokenValid(refreshToken);
 });

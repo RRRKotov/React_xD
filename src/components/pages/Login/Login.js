@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import "./Login.css";
 import { useHistory } from "react-router-dom";
 import data from "./Login.json";
@@ -32,11 +32,18 @@ export const Login = () => {
           sessionStorage.isLogged = 1;
           history.push("/");
         }
-        console.log(loginObj);
+
         setErrors(loginObj);
       });
   };
-  console.log(errors.isInvalid);
+  let today = new Date();
+  let date =
+    today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+  let unix = Date.now();
+  console.log(unix);
+
+
+  
 
   function convertFormData2JSON(formData) {
     let obj = {};
