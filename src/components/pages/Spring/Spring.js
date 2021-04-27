@@ -26,8 +26,8 @@ export const Spring = () => {
     if (sessionStorage.isLogged !== "1") {
       history.push("/login");
     }
-  });
-
+  });   
+  
   return (
     <Context.Provider value={{ openMobile, closeMobile, mobileStyles }}>
       <Mobile />

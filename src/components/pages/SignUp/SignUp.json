@@ -21,7 +21,7 @@
     "errorStatus":0},
 
     {  
-    "placeholder":"firstName",
+    "placeholder":"first name",
     "name":"firstName",
     "type":"text",
     "id":"3",

@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import "./Container.css";
 import { ContainerItem } from "./ContainerItem/ContainerItem.js";
+import { Base64 } from "js-base64";
 
 export const Container = () => {
   const [isMount, setIsMount] = useState(true);
+  const [tokens, setTokens] = useState({ accessToken: "", refreshToken: "" });
   useEffect(() => {
     setIsMount(true);
     if (isMount) {
-      fetch(`http://localhost:5000/getInitialData`, {
-        method: "get",
-      })
+      fetch(
+        `http://localhost:5000/getInitialData?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+        {
+          method: "get",
+        }
+      )
         .then((response) => {
           return response.json();
         })
@@ -39,17 +44,64 @@ export const Container = () => {
     }
   }, [newArray]);
 
-  const getFilteredData = (value) => {
-    fetch(`http://localhost:5000/filter?value=${value}`, {
-      method: "get",
-    })
+  const getTokensFromLocaleStorage=()=>{
+    const accessToken = localStorage.accessToken;
+    const refreshToken = localStorage.refreshToken;
+    setTokens({ accessToken: accessToken, refreshToken: refreshToken });
+  }
+  
+  const getFilteredData =  (value) => {
+    const accessToken = tokens.accessToken;
+    const refreshToken = tokens.refreshToken;
+    const [hashedHeader, hashedPayload, signature] = accessToken.split(".");
+    const decryptedPayload = Base64.decode(hashedPayload);
+    const parsedPayload = JSON.parse(decryptedPayload);
+    console.log(parsedPayload);
+    const currentDate = Date.now();
+    if (parsedPayload.exp > currentDate) {
+      console.log("access token is ok");
+      setTokens({ accessToken: accessToken, refreshToken: "" });
+    } else {
+      console.log("access token is expired");
+      setTokens({ accessToken: "", refreshToken: refreshToken });
+    }
+    console.log("I send");
+    console.log(tokens);
+     fetch(
+      `http://localhost:5000/filter?value=${value}&accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+      {
+        method: "get",
+      }
+    )
       .then((response) => {
         return response.json();
       })
       .then((dataFromServer) => {
-        setNewArray(dataFromServer);
+        if (dataFromServer.tokens.accessToken !== "") {
+          {
+            console.log("change access token");
+            setTokens({ accessToken: dataFromServer.tokens.accessToken, refreshToken:"" });
+          }
+          if (dataFromServer.tokens.refreshToken !== "") {
+            console.log("change refresh token");
+            setTokens({ accessToken: "", refreshToken: dataFromServer.tokens.refreshToken });
+          }
+          if(dataFromServer.tokens.accessToken !== ""&&dataFromServer.tokens.refreshToken !== ""){
+            setTokens({ accessToken: dataFromServer.tokens.accessToken, refreshToken: dataFromServer.tokens.refreshToken });
+          }
+        }
+        console.log("I get");
+        console.log(dataFromServer.tokens);
+        setNewArray(dataFromServer.array);
       });
   };
+  useEffect(() => {
+    getTokensFromLocaleStorage()
+  }, []);
+
+  
+  
+  
 
   return (
     <div className="container">

@@ -25,6 +25,7 @@ export const Login = () => {
         return response.json();
       })
       .then((loginObj) => {
+        console.log(loginObj);
         loginObj.errors.forEach((item, index) => {
           data[index].errorStatus = item;
         });
@@ -32,18 +33,11 @@ export const Login = () => {
           sessionStorage.isLogged = 1;
           history.push("/");
         }
-
+        localStorage.setItem("accessToken", loginObj.tokens.accessToken);
+        localStorage.setItem("refreshToken", loginObj.tokens.refreshToken);
         setErrors(loginObj);
       });
   };
-  let today = new Date();
-  let date =
-    today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-  let unix = Date.now();
-  console.log(unix);
-
-
-  
 
   function convertFormData2JSON(formData) {
     let obj = {};

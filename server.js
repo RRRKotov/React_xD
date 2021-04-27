@@ -7,24 +7,13 @@ const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const AES = require("crypto-js/aes");
-const { encrypt } = require("crypto-js/aes");
+const magicKey = "darova";
 
 const port = 5000;
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
-app.get("/filter", (req, response) => {
-  let value = req.query.value.toUpperCase();
-  let filter = db.query(
-    "SELECT * FROM projects WHERE UPPER(title)  LIKE $1 OR UPPER(content)  LIKE $1 ",
-    ["%" + value + "%"],
-    (err, res) => {
-      response.json(res.rows);
-    }
-  );
-});
 
 app.get("/insertProject", (req, response) => {
   data.forEach((item) => {
@@ -35,22 +24,108 @@ app.get("/insertProject", (req, response) => {
   });
 });
 
+const createNewAccessToken = () => {
+  const header = { alg: "Base64", typ: "JWT" };
+  const hashedHeader = Base64.encode(JSON.stringify(header));
+  const payload = { exp: Date.now() + 1000 * 10 };
+  const hashedPayload = Base64.encode(JSON.stringify(payload));
+  const headerAndPayload = hashedHeader + "." + hashedPayload;
+
+  const signature = AES.encrypt(JSON.stringify(headerAndPayload), magicKey);
+  const accessToken = headerAndPayload + "." + signature;
+  return accessToken;
+};
+
+const createNewRefreshToken = () => {
+  const refreshPayload = {
+    exp: Date.now() + 1000 * 15,
+  };
+  const refreshToken = AES.encrypt(
+    JSON.stringify(refreshPayload),
+    magicKey
+  ).toString();
+  return refreshToken;
+};
+
+const isAccessTokenValid = (accessToken) => {
+  const [hashedHeader, hashedPayload, signature] = accessToken.split(".");
+  const decryptedSignature = AES.decrypt(signature, magicKey).toString(
+    CryptoJS.enc.Utf8
+  );
+  const decryptedPayload = Base64.decode(hashedPayload);
+  const parsedPayload = JSON.parse(decryptedPayload);
+  const parsedHeader = JSON.stringify(hashedHeader);
+
+  const currentDate = Date.now();
+  const parsedSignature = decryptedSignature;
+
+  if (hashedHeader + "." + hashedPayload + '"' == parsedSignature) {
+    if (parsedPayload.exp > currentDate) {
+      return true;
+    } else return false;
+  } else {
+    return false;
+  }
+};
+
+const isRefreshTokenValid = (refreshToken) => {
+  const decryptedRefreshToken = AES.decrypt(refreshToken, magicKey).toString(
+    CryptoJS.enc.Utf8
+  );
+
+  const parsedRefreshToken = JSON.parse(decryptedRefreshToken);
+
+  const currentDate = Date.now();
+  if (parsedRefreshToken.exp > currentDate) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+app.get("/filter", (req, response) => {
+  const filterObj = {
+    array: [],
+    tokens: { accessToken: "", refreshToken: "" },
+    isLogin: 0,
+  };
+  let value = req.query.value.toUpperCase();
+  let refreshToken = req.query.refreshToken.replace(/ /g, "+");
+
+  let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
+  if (refreshToken === "" && !isAccessTokenValid(accessToken)) {
+    filterObj.isLogin = 1;
+  }
+
+  if (refreshToken !== "") {
+    if (isRefreshTokenValid(refreshToken)) {
+      filterObj.tokens.accessToken = createNewAccessToken();
+    } else {
+      filterObj.tokens.accessToken = createNewAccessToken();
+      filterObj.tokens.refreshToken = createNewRefreshToken();
+    }
+  }
+
+  let filter = db.query(
+    "SELECT * FROM projects WHERE UPPER(title)  LIKE $1 OR UPPER(content)  LIKE $1 ",
+    ["%" + value + "%"],
+    (err, res) => {
+      filterObj.array = res.rows;
+      response.json(filterObj);
+    }
+  );
+});
 app.get("/getInitialData", (req, response) => {
   let selectAll = db.query("SELECT * FROM projects", (err, res) => {
     response.json(res.rows);
   });
 });
 
-app.get("/truncateProjects", (req, res) => {
-  let result = db.query("TRUNCATE TABLE projects ");
-
-  res.send("deleted");
-});
-
 app.post("/login", async function (request, response) {
   const loginObj = {
     errors: [],
     isInvalid: 1,
+    tokens: { accessToken: "", refreshToken: "" },
   };
 
   await db.query(
@@ -78,6 +153,12 @@ app.post("/login", async function (request, response) {
             }
             const isInvalid = loginObj.errors.reduce((a, b) => a + b, 0);
             loginObj.isInvalid = isInvalid;
+            loginObj.tokens.accessToken = createNewAccessToken(
+              request.body.username
+            );
+            loginObj.tokens.refreshToken = createNewRefreshToken(
+              request.body.username
+            );
             response.send(loginObj);
           }
         );
@@ -95,6 +176,7 @@ app.post("/signup", async function (request, response) {
     errors: [],
     loginExists: "",
     isInvalid: 1,
+    tokens: { accessToken: "", refreshToken: "" },
   };
 
   if (request.body.username.search(usernameRegex)) {
@@ -151,6 +233,10 @@ app.post("/signup", async function (request, response) {
           ],
           (err, res) => {}
         );
+        errObj.tokens.accessToken = createNewAccessToken(request.body.username);
+        errObj.tokens.refreshToken = createNewRefreshToken(
+          request.body.username
+        );
       }
       console.log(errObj.errors);
       response.send(errObj);
@@ -159,64 +245,5 @@ app.post("/signup", async function (request, response) {
 });
 
 app.listen(port, () => {
-  const magicKey = "darova";
   console.log(`Server is running at http://localhost:${port}`);
-  const header = { alg: "Base64", typ: "JWT" };
-  const payload = { username: "Vasya", exp: 1581357039 };
-  const hashedHeader = Base64.encode(JSON.stringify(header));
-  console.log("hashed header: " + hashedHeader);
-  const decodedHeader = Base64.decode(hashedHeader);
-  const hashedPayload = Base64.encode(JSON.stringify(payload));
-  console.log("hashed payload: " + hashedPayload);
-  const decodedPayload = Base64.decode(hashedPayload);
-  const headerAndPayload = hashedHeader + "." + hashedPayload;
-  console.log("header and payload " + headerAndPayload);
-  const signature = AES.encrypt(headerAndPayload, magicKey);
-  console.log("signature: " + signature);
-  const decryptedSignature = AES.decrypt(signature, magicKey).toString(
-    CryptoJS.enc.Utf8
-  );
-  console.log("decryptedSignature: " + decryptedSignature);
-  const accessToken = headerAndPayload + "." + signature;
-  const [h1, h2, h3] = accessToken.split(".");
-
-  console.log("access token: " + accessToken);
-
-  const isAccessTokenValid = (accessToken) => {
-    const [hashedHeader, hashedPayload, signature] = accessToken.split(".");
-    const decryptedSignature = AES.decrypt(signature, magicKey).toString(
-      CryptoJS.enc.Utf8
-    );
-    const decryptedPayload = Base64.decode(hashedPayload);
-    const parsedPayload = JSON.parse(decryptedPayload);
-    const currentDate = Date.now();
-    if (
-      hashedHeader + "." + hashedPayload == decryptedSignature &&
-      parsedPayload.exp > currentDate
-    ) {
-      console.log("signature is valid");
-    } else {
-      console.log("signature is not valid");
-    }
-  };
-  isAccessTokenValid(accessToken);
-
-  const refreshPayload = { username: "Vasya", exp: 1581357039 };
-  const refreshToken = AES.encrypt(JSON.stringify(refreshPayload), magicKey);
-  console.log("refresh token: " + refreshToken);
-
-  const isRefreshTokenValid = (refreshToken) => {
-    const decryptedRefreshToken = AES.decrypt(refreshToken, magicKey).toString(
-      CryptoJS.enc.Utf8
-    );
-    const parsedRefreshToken = JSON.parse(decryptedRefreshToken);
-    console.log(parsedRefreshToken.exp);
-    const currentDate = Date.now();
-    if (parsedRefreshToken.exp > currentDate) {
-      console.log("refreshToken is valid");
-    } else {
-      console.log("refreshToken is not valid");
-    }
-  };
-  isRefreshTokenValid(refreshToken);
 });

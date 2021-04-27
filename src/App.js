@@ -6,8 +6,7 @@ import { SignUp } from "./components/pages/SignUp/SignUp.js";
 import "./App.css";
 
 export const App = () => {
-  
-  
+ 
   return (
     <Router>
       <Switch>
