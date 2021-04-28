@@ -95,19 +95,26 @@ app.get("/filter", (req, response) => {
   let refreshToken = req.query.refreshToken.replace(/ /g, "+");
 
   let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
-  if (refreshToken === "" && isAccessTokenValid(accessToken)) {
-    filterObj.isLogin = 1;
+  if (accessToken == '""') {
+    const check = isRefreshTokenValid(refreshToken);
+    if (isRefreshTokenValid(refreshToken)) {
+      response.status(401);
+      filterObj.isLogin = 1;
+    }
   }
-
+  
   if (refreshToken !== "") {
-    console.log(refreshToken);
     if (isRefreshTokenValid(refreshToken)) {
       console.log("refresh token is valid");
       filterObj.tokens.accessToken = createNewAccessToken();
     } else {
       console.log("refresh token is invalid");
-      filterObj.tokens.accessToken = createNewAccessToken();
-      filterObj.tokens.refreshToken = createNewRefreshToken();
+      filterObj.tokens.accessToken = "";
+      filterObj.tokens.refreshToken = "";
+    }
+  } else {
+    if (isAccessTokenValid(accessToken)) {
+      filterObj.isLogin = 1;
     }
   }
 
@@ -120,10 +127,42 @@ app.get("/filter", (req, response) => {
     }
   );
 });
+
 app.get("/getInitialData", (req, response) => {
-  
+  const filterObj = {
+    array: [],
+    tokens: { accessToken: "", refreshToken: "" },
+    isLogin: 0,
+  };
+  let refreshToken = req.query.refreshToken.replace(/ /g, "+");
+
+  let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
+
+  if (accessToken == '""') {
+    const check = isRefreshTokenValid(refreshToken);
+    if (isRefreshTokenValid(refreshToken)) {
+      response.status(401);
+      filterObj.isLogin = 1;
+    }
+  }
+
+  if (refreshToken !== "") {
+    if (isRefreshTokenValid(refreshToken)) {
+      console.log("refresh token is valid");
+      filterObj.tokens.accessToken = createNewAccessToken();
+    } else {
+      console.log("refresh token is invalid");
+      filterObj.tokens.accessToken = "";
+      filterObj.tokens.refreshToken = "";
+    }
+  } else {
+    if (isAccessTokenValid(accessToken)) {
+      filterObj.isLogin = 1;
+    }
+  }
   let selectAll = db.query("SELECT * FROM projects", (err, res) => {
-    response.json(res.rows);
+    filterObj.array = res.rows;
+    response.json(filterObj);
   });
 });
 

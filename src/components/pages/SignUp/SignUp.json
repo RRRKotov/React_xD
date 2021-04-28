@@ -3,7 +3,7 @@
     "placeholder":"username",
     "type":"text",
     "id":"0",
-    "errorMessage":"Must contain at least 3 symbols",
+    "errorMessage":"Must contain at least 3 symbols(only numbers and letters)",
     "errorStatus":0},
 
     { "name":"password",

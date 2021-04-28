@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import "./Container.css";
 import { ContainerItem } from "./ContainerItem/ContainerItem.js";
 import { Base64 } from "js-base64";
+import { useHistory } from "react-router-dom";
 
 export const Container = () => {
+  const history = useHistory();
   const [isMount, setIsMount] = useState(true);
   let tokens = useRef({
     accessToken: localStorage.accessToken,
@@ -11,10 +13,16 @@ export const Container = () => {
   });
 
   useEffect(() => {
+    getTokensFromLocaleStorage();
+  });
+  useEffect(() => {
+    console.log("I send");
+    validateTokens();
+    console.log(tokens);
     setIsMount(true);
     if (isMount) {
       fetch(
-        `http://localhost:5000/getInitialData?accessToken=${tokens.current.accessToken}&refreshToken=${tokens.current.refreshToken}`,
+        `http://localhost:5000/getInitialData?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
         {
           method: "get",
         }
@@ -23,7 +31,21 @@ export const Container = () => {
           return response.json();
         })
         .then((dataFromServer) => {
-          setNewArray(dataFromServer);
+          console.log("I get");
+          console.log(dataFromServer);
+          if (dataFromServer.isLogin == 0) {
+            localStorage.setItem("isLogged", 0);
+            history.push("/login");
+          }
+
+          if (dataFromServer.tokens.accessToken !== "") {
+            console.log("change access token");
+            localStorage.setItem(
+              "accessToken",
+              dataFromServer.tokens.accessToken
+            );
+          }
+          setNewArray(dataFromServer.array);
         });
     }
 
@@ -87,6 +109,11 @@ export const Container = () => {
       .then((dataFromServer) => {
         console.log("I get");
         console.log(dataFromServer);
+        if (dataFromServer.isLogin == 0) {
+          localStorage.setItem("isLogged", 0);
+          history.push("/login");
+        }
+
         if (dataFromServer.tokens.accessToken !== "") {
           console.log("change access token");
           localStorage.setItem(
@@ -94,24 +121,10 @@ export const Container = () => {
             dataFromServer.tokens.accessToken
           );
         }
-        if (dataFromServer.tokens.refreshToken !== "") {
-          console.log("change refresh and access token");
-          localStorage.setItem(
-            "accessToken",
-            dataFromServer.tokens.accessToken
-          );
-          localStorage.setItem(
-            "refreshToken",
-            dataFromServer.tokens.refreshToken
-          );
-        }
 
         setNewArray(dataFromServer.array);
       });
   };
-  useEffect(() => {
-    getTokensFromLocaleStorage();
-  });
 
   return (
     <div className="container">
