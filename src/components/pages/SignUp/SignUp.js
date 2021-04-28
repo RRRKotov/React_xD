@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 export const SignUp = () => {
   const history = useHistory();
   const [errors, setErrors] = useState(data);
-  sessionStorage.isLogged = 0;
+  localStorage.isLogged = 0;
   const handleOnSubmit = (e) => {
     e.preventDefault();
     let myForm = e.target;
@@ -36,7 +36,7 @@ export const SignUp = () => {
           data[index].errorStatus = item;
         });
         if (errObj.isInvalid === 0) {
-          sessionStorage.isLogged = 1;
+          localStorage.isLogged = 1;
           history.push("/");
         }
         setErrors(errObj);

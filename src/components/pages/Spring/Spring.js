@@ -23,11 +23,11 @@ export const Spring = () => {
   const history = useHistory();
 
   useEffect(() => {
-    if (sessionStorage.isLogged !== "1") {
+    if (localStorage.isLogged !== "1") {
       history.push("/login");
     }
-  });   
-  
+  });
+
   return (
     <Context.Provider value={{ openMobile, closeMobile, mobileStyles }}>
       <Mobile />

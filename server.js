@@ -77,8 +77,10 @@ const isRefreshTokenValid = (refreshToken) => {
 
   const currentDate = Date.now();
   if (parsedRefreshToken.exp > currentDate) {
+    console.log("refresh did not expire");
     return true;
   } else {
+    console.log("refresh expired");
     return false;
   }
 };
@@ -93,14 +95,17 @@ app.get("/filter", (req, response) => {
   let refreshToken = req.query.refreshToken.replace(/ /g, "+");
 
   let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
-  if (refreshToken === "" && !isAccessTokenValid(accessToken)) {
+  if (refreshToken === "" && isAccessTokenValid(accessToken)) {
     filterObj.isLogin = 1;
   }
 
   if (refreshToken !== "") {
+    console.log(refreshToken);
     if (isRefreshTokenValid(refreshToken)) {
+      console.log("refresh token is valid");
       filterObj.tokens.accessToken = createNewAccessToken();
     } else {
+      console.log("refresh token is invalid");
       filterObj.tokens.accessToken = createNewAccessToken();
       filterObj.tokens.refreshToken = createNewRefreshToken();
     }
@@ -116,6 +121,7 @@ app.get("/filter", (req, response) => {
   );
 });
 app.get("/getInitialData", (req, response) => {
+  
   let selectAll = db.query("SELECT * FROM projects", (err, res) => {
     response.json(res.rows);
   });

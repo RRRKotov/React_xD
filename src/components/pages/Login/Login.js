@@ -5,7 +5,7 @@ import data from "./Login.json";
 import { Input } from "../../reusableComponents/Input/Input.js";
 
 export const Login = () => {
-  sessionStorage.setItem("isLogged", 0);
+  localStorage.setItem("isLogged", 0);
   const [errors, setErrors] = useState("as");
   const history = useHistory();
 
@@ -30,7 +30,7 @@ export const Login = () => {
           data[index].errorStatus = item;
         });
         if (loginObj.isInvalid === 0) {
-          sessionStorage.isLogged = 1;
+          localStorage.isLogged = 1;
           history.push("/");
         }
         localStorage.setItem("accessToken", loginObj.tokens.accessToken);
@@ -55,7 +55,7 @@ export const Login = () => {
   useEffect(() => {
     return () => {
       if (errors.isInvalid === 0) {
-        sessionStorage.isLogged = 1;
+        localStorage.isLogged = 1;
       }
     };
   });

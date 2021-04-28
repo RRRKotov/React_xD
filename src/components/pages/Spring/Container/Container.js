@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Container.css";
 import { ContainerItem } from "./ContainerItem/ContainerItem.js";
 import { Base64 } from "js-base64";
 
 export const Container = () => {
   const [isMount, setIsMount] = useState(true);
-  const [tokens, setTokens] = useState({ accessToken: "", refreshToken: "" });
+  let tokens = useRef({
+    accessToken: localStorage.accessToken,
+    refreshToken: localStorage.refreshToken,
+  });
+
   useEffect(() => {
     setIsMount(true);
     if (isMount) {
       fetch(
-        `http://localhost:5000/getInitialData?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+        `http://localhost:5000/getInitialData?accessToken=${tokens.current.accessToken}&refreshToken=${tokens.current.refreshToken}`,
         {
           method: "get",
         }
@@ -44,30 +48,34 @@ export const Container = () => {
     }
   }, [newArray]);
 
-  const getTokensFromLocaleStorage=()=>{
+  const getTokensFromLocaleStorage = () => {
     const accessToken = localStorage.accessToken;
     const refreshToken = localStorage.refreshToken;
-    setTokens({ accessToken: accessToken, refreshToken: refreshToken });
-  }
-  
-  const getFilteredData =  (value) => {
+    tokens = { accessToken: accessToken, refreshToken: refreshToken };
+  };
+
+  const validateTokens = () => {
     const accessToken = tokens.accessToken;
     const refreshToken = tokens.refreshToken;
     const [hashedHeader, hashedPayload, signature] = accessToken.split(".");
     const decryptedPayload = Base64.decode(hashedPayload);
     const parsedPayload = JSON.parse(decryptedPayload);
-    console.log(parsedPayload);
+
     const currentDate = Date.now();
     if (parsedPayload.exp > currentDate) {
       console.log("access token is ok");
-      setTokens({ accessToken: accessToken, refreshToken: "" });
+      tokens = { accessToken: accessToken, refreshToken: "" };
     } else {
       console.log("access token is expired");
-      setTokens({ accessToken: "", refreshToken: refreshToken });
+      tokens = { accessToken: "", refreshToken: refreshToken };
     }
+  };
+
+  const getFilteredData = (value) => {
+    validateTokens();
     console.log("I send");
     console.log(tokens);
-     fetch(
+    fetch(
       `http://localhost:5000/filter?value=${value}&accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
       {
         method: "get",
@@ -77,31 +85,33 @@ export const Container = () => {
         return response.json();
       })
       .then((dataFromServer) => {
-        if (dataFromServer.tokens.accessToken !== "") {
-          {
-            console.log("change access token");
-            setTokens({ accessToken: dataFromServer.tokens.accessToken, refreshToken:"" });
-          }
-          if (dataFromServer.tokens.refreshToken !== "") {
-            console.log("change refresh token");
-            setTokens({ accessToken: "", refreshToken: dataFromServer.tokens.refreshToken });
-          }
-          if(dataFromServer.tokens.accessToken !== ""&&dataFromServer.tokens.refreshToken !== ""){
-            setTokens({ accessToken: dataFromServer.tokens.accessToken, refreshToken: dataFromServer.tokens.refreshToken });
-          }
-        }
         console.log("I get");
-        console.log(dataFromServer.tokens);
+        console.log(dataFromServer);
+        if (dataFromServer.tokens.accessToken !== "") {
+          console.log("change access token");
+          localStorage.setItem(
+            "accessToken",
+            dataFromServer.tokens.accessToken
+          );
+        }
+        if (dataFromServer.tokens.refreshToken !== "") {
+          console.log("change refresh and access token");
+          localStorage.setItem(
+            "accessToken",
+            dataFromServer.tokens.accessToken
+          );
+          localStorage.setItem(
+            "refreshToken",
+            dataFromServer.tokens.refreshToken
+          );
+        }
+
         setNewArray(dataFromServer.array);
       });
   };
   useEffect(() => {
-    getTokensFromLocaleStorage()
-  }, []);
-
-  
-  
-  
+    getTokensFromLocaleStorage();
+  });
 
   return (
     <div className="container">
