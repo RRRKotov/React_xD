@@ -24,9 +24,9 @@ export const SignUp = () => {
         return response.json();
       })
       .then((errObj) => {
-        console.log(errObj);
         localStorage.setItem("accessToken", errObj.tokens.accessToken);
         localStorage.setItem("refreshToken", errObj.tokens.refreshToken);
+        localStorage.setItem("lastCheckedToken", "accessToken");
         if (errObj.loginExists !== "") {
           //znau, 4to bad practice
           //2 different errors 4 0ne input((((

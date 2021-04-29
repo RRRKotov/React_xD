@@ -1,50 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Container.css";
 import { ContainerItem } from "./ContainerItem/ContainerItem.js";
-import { Base64 } from "js-base64";
 import { useHistory } from "react-router-dom";
 
 export const Container = () => {
   const history = useHistory();
   const [isMount, setIsMount] = useState(true);
-  let tokens = useRef({
-    accessToken: localStorage.accessToken,
-    refreshToken: localStorage.refreshToken,
-  });
 
   useEffect(() => {
-    getTokensFromLocaleStorage();
-  });
-  useEffect(() => {
-    console.log("I send");
-    validateTokens();
-    console.log(tokens);
+    sendTokensForValidation(localStorage.lastCheckedToken);
     setIsMount(true);
     if (isMount) {
-      fetch(
-        `http://localhost:5000/getInitialData?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
-        {
-          method: "get",
-        }
-      )
+      fetch(`http://localhost:5000/getInitialData`, {
+        method: "get",
+      })
         .then((response) => {
           return response.json();
         })
         .then((dataFromServer) => {
-          console.log("I get");
-          console.log(dataFromServer);
-          if (dataFromServer.isLogin == 0) {
-            localStorage.setItem("isLogged", 0);
-            history.push("/login");
-          }
-
-          if (dataFromServer.tokens.accessToken !== "") {
-            console.log("change access token");
-            localStorage.setItem(
-              "accessToken",
-              dataFromServer.tokens.accessToken
-            );
-          }
           setNewArray(dataFromServer.array);
         });
     }
@@ -57,6 +30,35 @@ export const Container = () => {
   const [toggleNoResult, setToggleNoResult] = useState({
     visibility: "hidden",
   });
+  const sendTokensForValidation = (tokenType) => {
+    fetch(
+      `http://localhost:5000/tokens?${tokenType}=${localStorage[tokenType]}`,
+      {
+        method: "get",
+      }
+    )
+      .then((response) => {
+        return response.json();
+      })
+      .then((dataFromServer) => {
+        if (dataFromServer.isLogin == 0) {
+          if (dataFromServer.tokenType == "refresh") {
+            localStorage.setItem("isLogged", 0);
+            history.push("/login");
+          } else {
+            localStorage.setItem("isLogged", 1);
+            sendTokensForValidation("refreshToken");
+          }
+        }
+
+        if (dataFromServer.tokens.accessToken !== undefined) {
+          localStorage.setItem(
+            "accessToken",
+            dataFromServer.tokens.accessToken
+          );
+        }
+      });
+  };
 
   const inputChange = (e) => {
     getFilteredData(e.target.value);
@@ -70,58 +72,15 @@ export const Container = () => {
     }
   }, [newArray]);
 
-  const getTokensFromLocaleStorage = () => {
-    const accessToken = localStorage.accessToken;
-    const refreshToken = localStorage.refreshToken;
-    tokens = { accessToken: accessToken, refreshToken: refreshToken };
-  };
-
-  const validateTokens = () => {
-    const accessToken = tokens.accessToken;
-    const refreshToken = tokens.refreshToken;
-    const [hashedHeader, hashedPayload, signature] = accessToken.split(".");
-    const decryptedPayload = Base64.decode(hashedPayload);
-    const parsedPayload = JSON.parse(decryptedPayload);
-
-    const currentDate = Date.now();
-    if (parsedPayload.exp > currentDate) {
-      console.log("access token is ok");
-      tokens = { accessToken: accessToken, refreshToken: "" };
-    } else {
-      console.log("access token is expired");
-      tokens = { accessToken: "", refreshToken: refreshToken };
-    }
-  };
-
   const getFilteredData = (value) => {
-    validateTokens();
-    console.log("I send");
-    console.log(tokens);
-    fetch(
-      `http://localhost:5000/filter?value=${value}&accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
-      {
-        method: "get",
-      }
-    )
+    sendTokensForValidation(localStorage.lastCheckedToken);
+    fetch(`http://localhost:5000/filter?value=${value}`, {
+      method: "get",
+    })
       .then((response) => {
         return response.json();
       })
       .then((dataFromServer) => {
-        console.log("I get");
-        console.log(dataFromServer);
-        if (dataFromServer.isLogin == 0) {
-          localStorage.setItem("isLogged", 0);
-          history.push("/login");
-        }
-
-        if (dataFromServer.tokens.accessToken !== "") {
-          console.log("change access token");
-          localStorage.setItem(
-            "accessToken",
-            dataFromServer.tokens.accessToken
-          );
-        }
-
         setNewArray(dataFromServer.array);
       });
   };

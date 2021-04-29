@@ -8,7 +8,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const AES = require("crypto-js/aes");
 const magicKey = "darova";
-
 const port = 5000;
 
 app.use(cors());
@@ -27,10 +26,9 @@ app.get("/insertProject", (req, response) => {
 const createNewAccessToken = () => {
   const header = { alg: "Base64", typ: "JWT" };
   const hashedHeader = Base64.encode(JSON.stringify(header));
-  const payload = { exp: Date.now() + 1000 * 10 };
+  const payload = { exp: Date.now() + 1000 * 7 };
   const hashedPayload = Base64.encode(JSON.stringify(payload));
   const headerAndPayload = hashedHeader + "." + hashedPayload;
-
   const signature = AES.encrypt(JSON.stringify(headerAndPayload), magicKey);
   const accessToken = headerAndPayload + "." + signature;
   return accessToken;
@@ -38,7 +36,7 @@ const createNewAccessToken = () => {
 
 const createNewRefreshToken = () => {
   const refreshPayload = {
-    exp: Date.now() + 1000 * 15,
+    exp: Date.now() + 1000 * 13,
   };
   const refreshToken = AES.encrypt(
     JSON.stringify(refreshPayload),
@@ -48,17 +46,21 @@ const createNewRefreshToken = () => {
 };
 
 const isAccessTokenValid = (accessToken) => {
+  let decryptedSignature = null;
   const [hashedHeader, hashedPayload, signature] = accessToken.split(".");
-  const decryptedSignature = AES.decrypt(signature, magicKey).toString(
-    CryptoJS.enc.Utf8
-  );
-  const decryptedPayload = Base64.decode(hashedPayload);
-  const parsedPayload = JSON.parse(decryptedPayload);
-  const parsedHeader = JSON.stringify(hashedHeader);
-
+  let parsedPayload = null;
+  let decryptedPayload = null;
+  try {
+    decryptedSignature = AES.decrypt(signature, magicKey).toString(
+      CryptoJS.enc.Utf8
+    );
+    decryptedPayload = Base64.decode(hashedPayload);
+    parsedPayload = JSON.parse(decryptedPayload);
+  } catch (e) {
+    return false;
+  }
   const currentDate = Date.now();
   const parsedSignature = decryptedSignature;
-
   if (hashedHeader + "." + hashedPayload + '"' == parsedSignature) {
     if (parsedPayload.exp > currentDate) {
       return true;
@@ -68,56 +70,55 @@ const isAccessTokenValid = (accessToken) => {
   }
 };
 
-const isRefreshTokenValid = (refreshToken) => {
-  const decryptedRefreshToken = AES.decrypt(refreshToken, magicKey).toString(
-    CryptoJS.enc.Utf8
-  );
+const shallRefreshToken = (refreshToken) => {
+  let parsedRefreshToken = null;
+  let decryptedRefreshToken = null;
 
-  const parsedRefreshToken = JSON.parse(decryptedRefreshToken);
+  try {
+    decryptedRefreshToken = AES.decrypt(refreshToken, magicKey).toString(
+      CryptoJS.enc.Utf8
+    );
 
+    parsedRefreshToken = JSON.parse(decryptedRefreshToken);
+  } catch (e) {
+    return false;
+  }
   const currentDate = Date.now();
   if (parsedRefreshToken.exp > currentDate) {
-    console.log("refresh did not expire");
     return true;
   } else {
-    console.log("refresh expired");
     return false;
   }
 };
 
-app.get("/filter", (req, response) => {
-  const filterObj = {
-    array: [],
-    tokens: { accessToken: "", refreshToken: "" },
+app.get("/tokens", (req, res) => {
+  const tokensObj = {
+    tokens: {},
     isLogin: 0,
+    tokenType: "access",
   };
-  let value = req.query.value.toUpperCase();
-  let refreshToken = req.query.refreshToken.replace(/ /g, "+");
-
-  let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
-  if (accessToken == '""') {
-    const check = isRefreshTokenValid(refreshToken);
-    if (isRefreshTokenValid(refreshToken)) {
-      response.status(401);
-      filterObj.isLogin = 1;
-    }
-  }
-  
-  if (refreshToken !== "") {
-    if (isRefreshTokenValid(refreshToken)) {
-      console.log("refresh token is valid");
-      filterObj.tokens.accessToken = createNewAccessToken();
+  if (req.query.accessToken !== undefined) {
+    let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
+    if (isAccessTokenValid(accessToken)) {
+      tokensObj.isLogin = 1;
     } else {
-      console.log("refresh token is invalid");
-      filterObj.tokens.accessToken = "";
-      filterObj.tokens.refreshToken = "";
+      res.status(401);
     }
   } else {
-    if (isAccessTokenValid(accessToken)) {
-      filterObj.isLogin = 1;
+    let refreshToken = req.query.refreshToken.replace(/ /g, "+");
+    if (shallRefreshToken(refreshToken)) {
+      tokensObj.isLogin = 1;
+      tokensObj.tokens.accessToken = createNewAccessToken();
+    } else {
+      tokensObj.tokenType = "refresh";
     }
   }
+  res.json(tokensObj);
+});
 
+app.get("/filter", (req, response) => {
+  let value = req.query.value.toUpperCase();
+  const filterObj = { array: [] };
   let filter = db.query(
     "SELECT * FROM projects WHERE UPPER(title)  LIKE $1 OR UPPER(content)  LIKE $1 ",
     ["%" + value + "%"],
@@ -129,40 +130,12 @@ app.get("/filter", (req, response) => {
 });
 
 app.get("/getInitialData", (req, response) => {
-  const filterObj = {
+  const initialDataObj = {
     array: [],
-    tokens: { accessToken: "", refreshToken: "" },
-    isLogin: 0,
   };
-  let refreshToken = req.query.refreshToken.replace(/ /g, "+");
-
-  let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
-
-  if (accessToken == '""') {
-    const check = isRefreshTokenValid(refreshToken);
-    if (isRefreshTokenValid(refreshToken)) {
-      response.status(401);
-      filterObj.isLogin = 1;
-    }
-  }
-
-  if (refreshToken !== "") {
-    if (isRefreshTokenValid(refreshToken)) {
-      console.log("refresh token is valid");
-      filterObj.tokens.accessToken = createNewAccessToken();
-    } else {
-      console.log("refresh token is invalid");
-      filterObj.tokens.accessToken = "";
-      filterObj.tokens.refreshToken = "";
-    }
-  } else {
-    if (isAccessTokenValid(accessToken)) {
-      filterObj.isLogin = 1;
-    }
-  }
   let selectAll = db.query("SELECT * FROM projects", (err, res) => {
-    filterObj.array = res.rows;
-    response.json(filterObj);
+    initialDataObj.array = res.rows;
+    response.json(initialDataObj);
   });
 });
 
@@ -216,7 +189,6 @@ app.post("/signup", async function (request, response) {
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/;
   const nameRegex = /^[A-Z]{1}[a-z]{2,}$/gm;
   const usernameRegex = /^[a-zA-Z0-9]{3,}$/;
-  console.log(request.body);
   let errObj = {
     errors: [],
     loginExists: "",
@@ -259,7 +231,6 @@ app.post("/signup", async function (request, response) {
     "SELECT FROM users WHERE username='" + request.body.username + "'",
     async (err, res) => {
       const isInvalid = errObj.errors.reduce((a, b) => a + b, 0);
-      console.log(res.rowCount);
       if (res.rowCount !== 0) {
         errObj.loginExists = "User with this login already exists";
         errObj.errors[0] = 1;
@@ -283,7 +254,6 @@ app.post("/signup", async function (request, response) {
           request.body.username
         );
       }
-      console.log(errObj.errors);
       response.send(errObj);
     }
   );

@@ -25,7 +25,6 @@ export const Login = () => {
         return response.json();
       })
       .then((loginObj) => {
-        console.log(loginObj);
         loginObj.errors.forEach((item, index) => {
           data[index].errorStatus = item;
         });
@@ -35,6 +34,7 @@ export const Login = () => {
         }
         localStorage.setItem("accessToken", loginObj.tokens.accessToken);
         localStorage.setItem("refreshToken", loginObj.tokens.refreshToken);
+        localStorage.setItem("lastCheckedToken", "accessToken");
         setErrors(loginObj);
       });
   };
