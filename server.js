@@ -36,7 +36,7 @@ const createNewAccessToken = () => {
 
 const createNewRefreshToken = () => {
   const refreshPayload = {
-    exp: Date.now() + 1000 * 13,
+    exp: Date.now() + 1000 * 20,
   };
   const refreshToken = AES.encrypt(
     JSON.stringify(refreshPayload),
@@ -45,6 +45,67 @@ const createNewRefreshToken = () => {
   return refreshToken;
 };
 
+app.use(["/filter", "/getInitialData"], function (req, res, next) {
+  res.locals.reqData = {};
+  res.locals.reqData.tokens = {};
+  res.locals.reqData.isLogin = 0;
+  res.locals.reqData.tokenType = "access";
+  res.locals.reqData.status401 = 0;
+  res.locals.reqData.array = [];
+  if (req.query.accessToken !== undefined) {
+    let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
+    if (isAccessTokenValid(accessToken)) {
+      res.locals.reqData.isLogin = 1;
+    } else {
+      res.locals.reqData.status401 = 1;
+    }
+  } else {
+    let refreshToken;
+    try {
+      refreshToken = req.query.refreshToken.replace(/ /g, "+");
+    } catch (e) {
+      refreshToken = "";
+    }
+
+    if (shallRefreshToken(refreshToken)) {
+      res.locals.reqData.isLogin = 1;
+      res.locals.reqData.tokens.accessToken = createNewAccessToken();
+    } else {
+      res.locals.reqData.tokenType = "refresh";
+      res.locals.reqData.status401 = 1;
+    }
+  }
+  next();
+});
+
+app.get("/filter", (req, response) => {
+  if (response.locals.reqData.status401 == 1) {
+    response.status(401);
+    response.json(response.locals.reqData);
+  } else {
+    let value = req.query.value.toUpperCase();
+    let filter = db.query(
+      "SELECT * FROM projects WHERE UPPER(title)  LIKE $1 OR UPPER(content)  LIKE $1 ",
+      ["%" + value + "%"],
+      (err, res) => {
+        response.locals.reqData.array = res.rows;
+        response.json(response.locals.reqData);
+      }
+    );
+  }
+});
+
+app.get("/getInitialData", (req, response) => {
+  if (response.locals.reqData.status401 == 1) {
+    response.status(401);
+    response.json(response.locals.reqData);
+  } else {
+    let selectAll = db.query("SELECT * FROM projects", (err, res) => {
+      response.locals.reqData.array = res.rows;
+      response.json(response.locals.reqData);
+    });
+  }
+});
 const isAccessTokenValid = (accessToken) => {
   let decryptedSignature = null;
   const [hashedHeader, hashedPayload, signature] = accessToken.split(".");
@@ -90,54 +151,6 @@ const shallRefreshToken = (refreshToken) => {
     return false;
   }
 };
-
-app.get("/tokens", (req, res) => {
-  const tokensObj = {
-    tokens: {},
-    isLogin: 0,
-    tokenType: "access",
-  };
-  if (req.query.accessToken !== undefined) {
-    let accessToken = JSON.stringify(req.query.accessToken).replace(/ /g, "+");
-    if (isAccessTokenValid(accessToken)) {
-      tokensObj.isLogin = 1;
-    } else {
-      res.status(401);
-    }
-  } else {
-    let refreshToken = req.query.refreshToken.replace(/ /g, "+");
-    if (shallRefreshToken(refreshToken)) {
-      tokensObj.isLogin = 1;
-      tokensObj.tokens.accessToken = createNewAccessToken();
-    } else {
-      tokensObj.tokenType = "refresh";
-    }
-  }
-  res.json(tokensObj);
-});
-
-app.get("/filter", (req, response) => {
-  let value = req.query.value.toUpperCase();
-  const filterObj = { array: [] };
-  let filter = db.query(
-    "SELECT * FROM projects WHERE UPPER(title)  LIKE $1 OR UPPER(content)  LIKE $1 ",
-    ["%" + value + "%"],
-    (err, res) => {
-      filterObj.array = res.rows;
-      response.json(filterObj);
-    }
-  );
-});
-
-app.get("/getInitialData", (req, response) => {
-  const initialDataObj = {
-    array: [],
-  };
-  let selectAll = db.query("SELECT * FROM projects", (err, res) => {
-    initialDataObj.array = res.rows;
-    response.json(initialDataObj);
-  });
-});
 
 app.post("/login", async function (request, response) {
   const loginObj = {

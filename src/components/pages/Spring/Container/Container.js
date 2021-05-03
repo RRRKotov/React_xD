@@ -8,31 +8,18 @@ export const Container = () => {
   const [isMount, setIsMount] = useState(true);
 
   useEffect(() => {
-    sendTokensForValidation(localStorage.lastCheckedToken);
     setIsMount(true);
     if (isMount) {
-      fetch(`http://localhost:5000/getInitialData`, {
-        method: "get",
-      })
-        .then((response) => {
-          return response.json();
-        })
-        .then((dataFromServer) => {
-          setNewArray(dataFromServer.array);
-        });
+      fetchForInitialData(localStorage.lastCheckedToken);
     }
-
     return () => {
       setIsMount(false);
     };
   }, [isMount]);
-  const [newArray, setNewArray] = useState([]);
-  const [toggleNoResult, setToggleNoResult] = useState({
-    visibility: "hidden",
-  });
-  const sendTokensForValidation = (tokenType) => {
+
+  const fetchForInitialData = (tokenType) => {
     fetch(
-      `http://localhost:5000/tokens?${tokenType}=${localStorage[tokenType]}`,
+      `http://localhost:5000/getInitialData?${tokenType}=${localStorage[tokenType]}`,
       {
         method: "get",
       }
@@ -47,7 +34,7 @@ export const Container = () => {
             history.push("/login");
           } else {
             localStorage.setItem("isLogged", 1);
-            sendTokensForValidation("refreshToken");
+            fetchForInitialData("refreshToken");
           }
         }
 
@@ -57,11 +44,16 @@ export const Container = () => {
             dataFromServer.tokens.accessToken
           );
         }
+        setNewArray(dataFromServer.array);
       });
   };
+  const [newArray, setNewArray] = useState([]);
+  const [toggleNoResult, setToggleNoResult] = useState({
+    visibility: "hidden",
+  });
 
   const inputChange = (e) => {
-    getFilteredData(e.target.value);
+    getFilteredData(e.target.value, localStorage.lastCheckedToken);
   };
 
   useEffect(() => {
@@ -72,15 +64,34 @@ export const Container = () => {
     }
   }, [newArray]);
 
-  const getFilteredData = (value) => {
-    sendTokensForValidation(localStorage.lastCheckedToken);
-    fetch(`http://localhost:5000/filter?value=${value}`, {
-      method: "get",
-    })
+  const getFilteredData = (value, tokenType) => {
+    let currentValue = value;
+    fetch(
+      `http://localhost:5000/filter?value=${value}&${tokenType}=${localStorage[tokenType]}`,
+      {
+        method: "get",
+      }
+    )
       .then((response) => {
         return response.json();
       })
       .then((dataFromServer) => {
+        if (dataFromServer.isLogin == 0) {
+          if (dataFromServer.tokenType == "refresh") {
+            localStorage.setItem("isLogged", 0);
+            history.push("/login");
+          } else {
+            localStorage.setItem("isLogged", 1);
+            getFilteredData(currentValue, "refreshToken");
+          }
+        }
+
+        if (dataFromServer.tokens.accessToken !== undefined) {
+          localStorage.setItem(
+            "accessToken",
+            dataFromServer.tokens.accessToken
+          );
+        }
         setNewArray(dataFromServer.array);
       });
   };
